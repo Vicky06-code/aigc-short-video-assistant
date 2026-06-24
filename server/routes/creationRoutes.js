@@ -5,7 +5,7 @@ import {
   getCreationDetail,
   getCreations
 } from '../controllers/creationController.js';
-import authMiddleware from '../utils/authMiddleware.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

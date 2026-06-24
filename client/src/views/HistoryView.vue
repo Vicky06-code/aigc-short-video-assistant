@@ -28,7 +28,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import http from '../api/http';
+import request from '../utils/request';
 
 const loading = ref(false);
 const records = ref([]);
@@ -36,7 +36,7 @@ const records = ref([]);
 async function loadRecords() {
   loading.value = true;
   try {
-    const res = await http.get('/creations');
+    const res = await request.get('/creations');
     records.value = res.data;
   } catch (error) {
     ElMessage.error(error.message);
@@ -47,7 +47,7 @@ async function loadRecords() {
 
 async function remove(id) {
   await ElMessageBox.confirm('确认删除这条创作记录吗？', '删除确认');
-  await http.delete(`/creations/${id}`);
+  await request.delete(`/creations/${id}`);
   ElMessage.success('删除成功');
   loadRecords();
 }

@@ -84,7 +84,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import http from '../api/http';
+import request from '../utils/request';
 
 const platforms = ['抖音', '小红书', 'B站', '视频号'];
 const styles = ['知识科普', '生活分享', '产品种草', '剧情口播'];
@@ -102,7 +102,7 @@ const form = reactive({
 async function generate() {
   loading.value = true;
   try {
-    const res = await http.post('/creations/generate', form);
+    const res = await request.post('/creations/generate', form);
     result.value = res.data.result;
     ElMessage.success('创作方案已生成并保存');
   } catch (error) {
@@ -114,7 +114,7 @@ async function generate() {
 
 function logout() {
   localStorage.removeItem('token');
-  localStorage.removeItem('username');
+  localStorage.removeItem('user');
   location.href = '/login';
 }
 

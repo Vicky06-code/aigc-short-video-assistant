@@ -1,6 +1,6 @@
 # 基于 AIGC 的智能短视频内容创作辅助系统
 
-这是一个课程大作业 MVP 项目骨架，目标是在 8 天内完成可运行、可展示、可部署的智能短视频创作辅助系统。
+这是一个课程大作业 MVP 项目，目标是在 8 天内完成可运行、可展示、可部署的智能短视频创作辅助系统。
 
 ## 技术栈
 
@@ -22,6 +22,7 @@ aigc-short-video-assistant/
 │   ├── routes/
 │   ├── controllers/
 │   ├── models/
+│   ├── middleware/
 │   ├── utils/
 │   ├── app.js
 │   ├── db.js
@@ -32,22 +33,18 @@ aigc-short-video-assistant/
 └── README.md
 ```
 
-## 已完成功能骨架
+## 第二阶段完成内容
 
-- 用户注册、登录接口
-- JWT 鉴权中间件
-- 创作方案生成接口
-- 创作历史列表、详情、删除接口
-- 规则模板版 AIGC 生成器
-- Vue 前端登录、注册、创作台、历史记录、详情页面
-- 复制结果、导出 TXT、导出 JSON 的前端能力
-- MySQL 初始化 SQL
-
-## 环境要求
-
-- Node.js 18 或更高版本
-- MySQL 8 或兼容版本
-- npm
+- 用户注册：用户名唯一、邮箱唯一、bcrypt 加密密码
+- 用户登录：邮箱 + 密码登录，成功后返回 7 天有效期 JWT
+- JWT 中间件：统一校验 `Authorization: Bearer <token>`
+- 当前用户接口：`GET /api/auth/profile`
+- 统一错误处理：返回 `{ success: false, message }`
+- 前端登录页：`client/src/views/Login.vue`
+- 前端注册页：`client/src/views/Register.vue`
+- Axios 封装：`client/src/utils/request.js`
+- 路由守卫：未登录访问系统主页自动跳转登录页
+- localStorage 保存 `token` 和用户信息
 
 ## 数据库初始化
 
@@ -57,7 +54,15 @@ aigc-short-video-assistant/
 mysql -u root -p < database/init.sql
 ```
 
-如果你的 MySQL 用户名、密码或端口不同，请后续同步修改后端 `.env`。
+`users` 表字段：
+
+- `id`
+- `username`
+- `email`
+- `password`
+- `created_at`
+
+如果你的 MySQL 用户名、密码或端口不同，请同步修改后端 `.env`。
 
 ## 后端运行
 
@@ -98,14 +103,70 @@ http://localhost:5173
 
 Vite 已配置 `/api` 代理到 `http://localhost:3000`。
 
-## API 概览
+## 认证 API
 
-### 用户模块
+### 注册
 
-- `POST /api/auth/register`：用户注册
-- `POST /api/auth/login`：用户登录，返回 JWT
+```text
+POST /api/auth/register
+```
 
-### 创作模块
+请求体：
+
+```json
+{
+  "username": "demo",
+  "email": "demo@example.com",
+  "password": "123456"
+}
+```
+
+### 登录
+
+```text
+POST /api/auth/login
+```
+
+请求体：
+
+```json
+{
+  "email": "demo@example.com",
+  "password": "123456"
+}
+```
+
+成功返回：
+
+```json
+{
+  "success": true,
+  "token": "...",
+  "user": {
+    "id": 1,
+    "username": "demo",
+    "email": "demo@example.com"
+  }
+}
+```
+
+### 当前用户
+
+```text
+GET /api/auth/profile
+Authorization: Bearer <token>
+```
+
+错误返回统一格式：
+
+```json
+{
+  "success": false,
+  "message": "错误信息"
+}
+```
+
+## 创作 API
 
 以下接口需要请求头：
 
@@ -126,8 +187,4 @@ Authorization: Bearer <token>
 server/utils/aigcGenerator.js
 ```
 
-后续接入真实大模型 API 时，建议保留 `generateVideoPlan` 作为统一入口，在该函数内部替换为 API 调用，并保持返回字段结构不变，前端和数据库即可少改或不改。
-
-## 第 1 阶段完成情况
-
-已完成完整项目骨架、基础页面、后端接口分层、数据库 SQL 和运行文档。下一阶段建议开始安装依赖并联调注册、登录、生成、历史记录全流程。
+后续接入真实大模型 API 时，建议保留 `generateVideoPlan` 作为统一入口，在该函数内部替换为 API 调用，并保持返回字段结构不变。

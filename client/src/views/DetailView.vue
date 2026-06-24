@@ -17,7 +17,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import http from '../api/http';
+import request from '../utils/request';
 
 const route = useRoute();
 const loading = ref(false);
@@ -26,7 +26,7 @@ const record = ref(null);
 onMounted(async () => {
   loading.value = true;
   try {
-    const res = await http.get(`/creations/${route.params.id}`);
+    const res = await request.get(`/creations/${route.params.id}`);
     record.value = res.data;
   } catch (error) {
     ElMessage.error(error.message);

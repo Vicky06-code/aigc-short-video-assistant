@@ -4,8 +4,8 @@
       <h1>AIGC 智能短视频创作助手</h1>
       <p>登录后开始生成课程展示级短视频方案</p>
       <el-form :model="form" label-position="top" @submit.prevent>
-        <el-form-item label="用户名">
-          <el-input v-model="form.username" placeholder="请输入用户名" />
+        <el-form-item label="邮箱">
+          <el-input v-model="form.email" placeholder="请输入邮箱" />
         </el-form-item>
         <el-form-item label="密码">
           <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
@@ -21,18 +21,23 @@
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
-import http from '../api/http';
+import request from '../utils/request';
 
 const router = useRouter();
 const loading = ref(false);
-const form = reactive({ username: '', password: '' });
+const form = reactive({ email: '', password: '' });
 
 async function submit() {
+  if (!form.email || !form.password) {
+    ElMessage.warning('请填写邮箱和密码');
+    return;
+  }
+
   loading.value = true;
   try {
-    const res = await http.post('/auth/login', form);
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('username', res.data.user.username);
+    const res = await request.post('/auth/login', form);
+    localStorage.setItem('token', res.token);
+    localStorage.setItem('user', JSON.stringify(res.user));
     ElMessage.success('登录成功');
     router.push('/dashboard');
   } catch (error) {
