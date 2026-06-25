@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   deleteCreation,
+  generateAndSaveCreation,
   generateCreation,
   getCreationDetail,
   getCreations
@@ -11,16 +12,14 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-// 生成创作方案：接收主题、平台、风格、时长、受众，使用规则模板模拟 AIGC 并保存。
+// Generate a creation plan with rule templates. This stage does not save history.
 router.post('/generate', generateCreation);
 
-// 获取当前登录用户的全部历史记录。
+// Reserved for the history module: generate and save a creation plan.
+router.post('/generate-and-save', generateAndSaveCreation);
+
 router.get('/', getCreations);
-
-// 获取单条创作记录详情。
 router.get('/:id', getCreationDetail);
-
-// 删除当前登录用户的一条创作记录。
 router.delete('/:id', deleteCreation);
 
 export default router;

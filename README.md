@@ -8,7 +8,7 @@
 - 后端：Node.js + Express
 - 数据库：MySQL
 - 鉴权：JWT
-- AIGC：当前使用规则模板模拟生成，后续可替换为真实大模型 API
+- AIGC：当前使用规则模板模拟生成，后续可替换为 DeepSeek/OpenAI API
 
 ## 目录结构
 
@@ -23,6 +23,7 @@ aigc-short-video-assistant/
 │   ├── controllers/
 │   ├── models/
 │   ├── middleware/
+│   ├── services/
 │   ├── utils/
 │   ├── app.js
 │   ├── db.js
@@ -33,18 +34,35 @@ aigc-short-video-assistant/
 └── README.md
 ```
 
-## 第二阶段完成内容
+## 已完成阶段
+
+### 第一阶段：项目骨架
+
+- 前端 Vite + Vue3 + Element Plus 基础工程
+- 后端 Express 基础工程
+- MySQL 初始化 SQL
+- README 运行说明
+
+### 第二阶段：用户认证
 
 - 用户注册：用户名唯一、邮箱唯一、bcrypt 加密密码
 - 用户登录：邮箱 + 密码登录，成功后返回 7 天有效期 JWT
 - JWT 中间件：统一校验 `Authorization: Bearer <token>`
 - 当前用户接口：`GET /api/auth/profile`
 - 统一错误处理：返回 `{ success: false, message }`
-- 前端登录页：`client/src/views/Login.vue`
-- 前端注册页：`client/src/views/Register.vue`
-- Axios 封装：`client/src/utils/request.js`
-- 路由守卫：未登录访问系统主页自动跳转登录页
-- localStorage 保存 `token` 和用户信息
+- 前端登录页、注册页、路由守卫、Axios 封装
+
+### 第三阶段：AIGC 创作生成
+
+- 新增接口：`POST /api/creation/generate`
+- 接口必须登录后访问
+- 新增 `server/services/creationService.js`
+- 新增 `server/utils/templateGenerator.js`
+- 规则模板生成 5 个标题、口播文案、分镜脚本、标签、发布建议
+- 按时长控制脚本长度和分镜数量：15 秒 3 个、30 秒 5 个、60 秒 7 个
+- 按平台输出差异化发布建议
+- 新增前端创作页：`client/src/views/Create.vue`
+- 使用 Element Plus 表单、卡片、表格和标签展示结果
 
 ## 数据库初始化
 
@@ -53,14 +71,6 @@ aigc-short-video-assistant/
 ```bash
 mysql -u root -p < database/init.sql
 ```
-
-`users` 表字段：
-
-- `id`
-- `username`
-- `email`
-- `password`
-- `created_at`
 
 如果你的 MySQL 用户名、密码或端口不同，请同步修改后端 `.env`。
 
@@ -157,34 +167,79 @@ GET /api/auth/profile
 Authorization: Bearer <token>
 ```
 
-错误返回统一格式：
+## 创作生成 API
 
-```json
-{
-  "success": false,
-  "message": "错误信息"
-}
-```
-
-## 创作 API
-
-以下接口需要请求头：
+### 生成创作方案
 
 ```text
+POST /api/creation/generate
 Authorization: Bearer <token>
 ```
 
-- `POST /api/creations/generate`：生成并保存创作方案
+请求体：
+
+```json
+{
+  "topic": "大学生如何提高学习效率",
+  "platform": "抖音",
+  "style": "知识科普",
+  "duration": 30,
+  "audience": "大学生"
+}
+```
+
+成功返回：
+
+```json
+{
+  "success": true,
+  "data": {
+    "titles": [],
+    "selectedTitle": "",
+    "speechScript": "",
+    "storyboard": [],
+    "tags": [],
+    "publishAdvice": {
+      "bestTime": "",
+      "coverText": "",
+      "interactionGuide": "",
+      "platformAdvice": ""
+    }
+  }
+}
+```
+
+### 历史记录预留接口
+
+以下接口同样需要 JWT：
+
+- `POST /api/creations/generate-and-save`：生成并保存创作方案，供后续历史记录模块使用
 - `GET /api/creations`：查询历史记录
 - `GET /api/creations/:id`：查询详情
 - `DELETE /api/creations/:id`：删除记录
 
-## AIGC 替换说明
+## 前端使用
 
-当前生成逻辑位于：
+登录成功后会进入创作页，也可以直接访问：
 
 ```text
-server/utils/aigcGenerator.js
+http://localhost:5173/create
 ```
 
-后续接入真实大模型 API 时，建议保留 `generateVideoPlan` 作为统一入口，在该函数内部替换为 API 调用，并保持返回字段结构不变。
+页面支持：
+
+- 输入视频主题、平台、风格、时长、目标受众
+- 点击按钮生成创作方案
+- 分模块展示标题推荐、口播文案、分镜脚本、标签和发布建议
+- 分镜脚本使用 Element Plus 表格展示
+
+## AIGC 替换说明
+
+当前生成入口位于：
+
+```text
+server/services/creationService.js
+server/utils/templateGenerator.js
+```
+
+后续接入真实 DeepSeek/OpenAI API 时，建议保留 `generateCreationPlan` 作为统一入口，在 service 层内部替换为真实 API 调用，并保持返回字段结构不变。

@@ -18,6 +18,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/creation', creationRoutes);
 app.use('/api/creations', creationRoutes);
 
 app.use(errorHandler);

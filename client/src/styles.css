@@ -66,8 +66,17 @@ body {
   padding: 28px 5vw;
 }
 
+.create-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+  gap: 24px;
+  padding: 28px 5vw;
+}
+
 .input-card,
 .result-panel,
+.create-input,
+.create-results,
 .history-list,
 .detail-page {
   border: 1px solid #dfe7f1;
@@ -77,8 +86,46 @@ body {
 }
 
 .input-card,
-.result-panel {
+.result-panel,
+.create-input,
+.create-results {
   padding: 24px;
+}
+
+.create-results {
+  display: grid;
+  gap: 18px;
+}
+
+.section-title h2 {
+  margin: 0 0 8px;
+}
+
+.section-title p {
+  margin: 0 0 18px;
+  color: #687385;
+  line-height: 1.7;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.result-card {
+  border-radius: 8px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title-list {
+  margin: 0;
+  padding-left: 22px;
+  line-height: 2;
 }
 
 .result-actions {
@@ -126,6 +173,10 @@ body {
   }
 
   .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .create-layout {
     grid-template-columns: 1fr;
   }
 }

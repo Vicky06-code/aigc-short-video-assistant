@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
-import DashboardView from '../views/DashboardView.vue';
+import Create from '../views/Create.vue';
 import HistoryView from '../views/HistoryView.vue';
 import DetailView from '../views/DetailView.vue';
 
@@ -11,7 +11,8 @@ const router = createRouter({
     { path: '/', redirect: '/dashboard' },
     { path: '/login', component: Login },
     { path: '/register', component: Register },
-    { path: '/dashboard', component: DashboardView, meta: { requiresAuth: true } },
+    { path: '/dashboard', component: Create, meta: { requiresAuth: true } },
+    { path: '/create', component: Create, meta: { requiresAuth: true } },
     { path: '/history', component: HistoryView, meta: { requiresAuth: true } },
     { path: '/history/:id', component: DetailView, meta: { requiresAuth: true } }
   ]
