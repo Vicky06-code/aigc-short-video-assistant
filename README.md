@@ -75,6 +75,16 @@ aigc-short-video-assistant/
 - Axios 统一处理 token 携带、401 清理登录态和错误提示
 - 全局样式升级为蓝紫渐变、卡片化后台风格
 
+### 第五阶段：创作记录管理
+
+- 生成结果可保存到 MySQL，不再依赖 LocalStorage
+- 新增 `server/services/historyService.js`
+- 新增保存、历史列表、详情、删除、清空全部历史记录接口
+- 历史记录页支持搜索、平台筛选、风格筛选和时间排序
+- 历史详情使用 Drawer 展示标题、口播、分镜、标签和发布建议
+- 创作页生成后可点击“保存创作方案”
+- 个人中心展示累计生成次数、最近生成时间、历史记录数量
+
 ## 数据库初始化
 
 先在 MySQL 中执行：
@@ -84,6 +94,18 @@ mysql -u root -p < database/init.sql
 ```
 
 如果你的 MySQL 用户名、密码或端口不同，请同步修改后端 `.env`。
+
+第五阶段更新了 `creations` 表字段。如果本地已经初始化过旧表，可以在开发环境中删除旧库后重新执行 `database/init.sql`：
+
+```sql
+DROP DATABASE aigc_short_video;
+```
+
+然后重新执行：
+
+```bash
+mysql -u root -p < database/init.sql
+```
 
 ## 后端运行
 
@@ -224,10 +246,47 @@ Authorization: Bearer <token>
 
 以下接口同样需要 JWT：
 
-- `POST /api/creations/generate-and-save`：生成并保存创作方案，供后续历史记录模块使用
-- `GET /api/creations`：查询历史记录
-- `GET /api/creations/:id`：查询详情
-- `DELETE /api/creations/:id`：删除记录
+- `POST /api/creation/save`：保存创作方案
+- `GET /api/creation/history`：查询当前用户历史记录
+- `GET /api/creation/detail/:id`：查询单条完整记录
+- `DELETE /api/creation/:id`：删除单条记录
+- `DELETE /api/creation/all`：清空当前用户全部历史记录
+
+### 保存创作方案
+
+```text
+POST /api/creation/save
+Authorization: Bearer <token>
+```
+
+请求体：
+
+```json
+{
+  "topic": "大学生如何提高学习效率",
+  "platform": "抖音",
+  "style": "知识科普",
+  "duration": 30,
+  "audience": "大学生",
+  "titles": [],
+  "speechScript": "",
+  "storyboard": [],
+  "tags": [],
+  "publishAdvice": {}
+}
+```
+
+成功返回：
+
+```json
+{
+  "success": true,
+  "message": "保存成功",
+  "data": {
+    "id": 1
+  }
+}
+```
 
 ## 前端使用
 

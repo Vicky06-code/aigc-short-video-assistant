@@ -21,7 +21,11 @@ CREATE TABLE IF NOT EXISTS creations (
   style VARCHAR(50) NOT NULL,
   duration VARCHAR(20) NOT NULL,
   audience VARCHAR(255) NOT NULL,
-  result_json JSON NOT NULL,
+  titles_json JSON NOT NULL,
+  speech_script TEXT NOT NULL,
+  storyboard_json JSON NOT NULL,
+  tags_json JSON NOT NULL,
+  publish_advice_json JSON NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_creations_user

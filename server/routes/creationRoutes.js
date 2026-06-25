@@ -1,10 +1,11 @@
 import express from 'express';
 import {
+  clearCreationHistory,
   deleteCreation,
-  generateAndSaveCreation,
   generateCreation,
   getCreationDetail,
-  getCreations
+  getCreationHistory,
+  saveCreationRecord
 } from '../controllers/creationController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
@@ -12,14 +13,11 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-// Generate a creation plan with rule templates. This stage does not save history.
 router.post('/generate', generateCreation);
-
-// Reserved for the history module: generate and save a creation plan.
-router.post('/generate-and-save', generateAndSaveCreation);
-
-router.get('/', getCreations);
-router.get('/:id', getCreationDetail);
+router.post('/save', saveCreationRecord);
+router.get('/history', getCreationHistory);
+router.get('/detail/:id', getCreationDetail);
+router.delete('/all', clearCreationHistory);
 router.delete('/:id', deleteCreation);
 
 export default router;

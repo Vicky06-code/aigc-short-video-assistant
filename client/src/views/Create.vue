@@ -3,7 +3,7 @@
     <section class="create-input">
       <div class="section-title">
         <h2>创作输入</h2>
-        <p>填写基础信息后，系统会生成适合不同平台的短视频创作方案。</p>
+        <p>填写基础信息后，系统会生成适合不同平台的短视频创作方案，并可保存到数据库。</p>
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
@@ -48,6 +48,16 @@
       </div>
 
       <template v-else>
+        <div class="save-bar">
+          <div>
+            <strong>生成结果</strong>
+            <span>{{ saved ? '当前方案已保存到数据库' : '保存后可在历史记录中查看' }}</span>
+          </div>
+          <el-button type="success" :loading="saving" :disabled="saved" @click="saveResult">
+            {{ saved ? '已保存' : '保存创作方案' }}
+          </el-button>
+        </div>
+
         <ResultCard title="标题推荐">
           <template #extra>
             <el-tag type="primary">已选：{{ result.selectedTitle }}</el-tag>
@@ -102,6 +112,8 @@ const platforms = ['抖音', '小红书', 'B站', '视频号'];
 const styles = ['知识科普', '生活分享', '产品种草', '剧情口播'];
 const formRef = ref(null);
 const loading = ref(false);
+const saving = ref(false);
+const saved = ref(false);
 const result = ref(null);
 
 const form = reactive({
@@ -128,11 +140,34 @@ async function generate() {
   try {
     const res = await request.post('/creation/generate', form);
     result.value = res.data;
+    saved.value = false;
     ElMessage.success('创作方案已生成');
   } catch (error) {
     ElMessage.error(error.message);
   } finally {
     loading.value = false;
+  }
+}
+
+async function saveResult() {
+  if (!result.value) return;
+
+  saving.value = true;
+  try {
+    await request.post('/creation/save', {
+      ...form,
+      titles: result.value.titles,
+      speechScript: result.value.speechScript,
+      storyboard: result.value.storyboard,
+      tags: result.value.tags,
+      publishAdvice: result.value.publishAdvice
+    });
+    saved.value = true;
+    ElMessage.success('保存成功，可在历史记录中查看');
+  } catch (error) {
+    ElMessage.error(error.message);
+  } finally {
+    saving.value = false;
   }
 }
 </script>
