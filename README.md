@@ -64,6 +64,17 @@ aigc-short-video-assistant/
 - 新增前端创作页：`client/src/views/Create.vue`
 - 使用 Element Plus 表单、卡片、表格和标签展示结果
 
+### 第四阶段：完整前端界面
+
+- 新增统一后台布局：`client/src/layouts/MainLayout.vue`
+- 新增工作台页面：`client/src/views/Dashboard.vue`
+- 完善智能创作页、历史记录页和个人中心页
+- 登录页和注册页接入 Element Plus 表单校验
+- 新增可复用结果展示组件：`ResultCard`、`StoryboardTable`、`TagList`
+- 登录后使用顶部栏 + 左侧菜单 + 内容区布局
+- Axios 统一处理 token 携带、401 清理登录态和错误提示
+- 全局样式升级为蓝紫渐变、卡片化后台风格
+
 ## 数据库初始化
 
 先在 MySQL 中执行：
@@ -232,6 +243,16 @@ http://localhost:5173/create
 - 点击按钮生成创作方案
 - 分模块展示标题推荐、口播文案、分镜脚本、标签和发布建议
 - 分镜脚本使用 Element Plus 表格展示
+
+## 前端路由
+
+- `/login`：登录页，不使用后台布局
+- `/register`：注册页，不使用后台布局
+- `/`：默认重定向到 `/dashboard`
+- `/dashboard`：工作台
+- `/create`：智能创作
+- `/history`：历史记录
+- `/profile`：个人中心
 
 ## AIGC 替换说明
 

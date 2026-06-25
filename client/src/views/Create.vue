@@ -1,131 +1,106 @@
 <template>
-  <div class="app-shell">
-    <header class="topbar">
-      <div>
-        <h1>AIGC 短视频创作生成</h1>
-        <span>规则模板模拟智能生成，后端已预留真实大模型 API 替换入口</span>
+  <div class="create-layout">
+    <section class="create-input">
+      <div class="section-title">
+        <h2>创作输入</h2>
+        <p>填写基础信息后，系统会生成适合不同平台的短视频创作方案。</p>
       </div>
-      <nav>
-        <el-button @click="$router.push('/history')">历史记录</el-button>
-        <el-button type="danger" plain @click="logout">退出登录</el-button>
-      </nav>
-    </header>
 
-    <main class="create-layout">
-      <section class="create-input">
-        <div class="section-title">
-          <h2>创作输入</h2>
-          <p>输入主题后，系统会组合平台、风格、时长和受众生成完整创作方案。</p>
-        </div>
+      <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
+        <el-form-item label="视频主题" prop="topic">
+          <el-input v-model="form.topic" placeholder="例如：大学生如何提高学习效率" clearable />
+        </el-form-item>
 
-        <el-form :model="form" label-position="top">
-          <el-form-item label="视频主题">
-            <el-input v-model="form.topic" placeholder="例如：大学生如何提高学习效率" clearable />
-          </el-form-item>
+        <el-form-item label="发布平台" prop="platform">
+          <el-select v-model="form.platform" class="full-width">
+            <el-option v-for="item in platforms" :key="item" :label="item" :value="item" />
+          </el-select>
+        </el-form-item>
 
-          <el-form-item label="发布平台">
-            <el-select v-model="form.platform" class="full-width">
-              <el-option v-for="item in platforms" :key="item" :label="item" :value="item" />
-            </el-select>
-          </el-form-item>
+        <el-form-item label="内容风格" prop="style">
+          <el-select v-model="form.style" class="full-width">
+            <el-option v-for="item in styles" :key="item" :label="item" :value="item" />
+          </el-select>
+        </el-form-item>
 
-          <el-form-item label="内容风格">
-            <el-select v-model="form.style" class="full-width">
-              <el-option v-for="item in styles" :key="item" :label="item" :value="item" />
-            </el-select>
-          </el-form-item>
+        <el-form-item label="视频时长" prop="duration">
+          <el-radio-group v-model="form.duration">
+            <el-radio-button :label="15">15 秒</el-radio-button>
+            <el-radio-button :label="30">30 秒</el-radio-button>
+            <el-radio-button :label="60">60 秒</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
 
-          <el-form-item label="视频时长">
-            <el-radio-group v-model="form.duration">
-              <el-radio-button :label="15">15 秒</el-radio-button>
-              <el-radio-button :label="30">30 秒</el-radio-button>
-              <el-radio-button :label="60">60 秒</el-radio-button>
-            </el-radio-group>
-          </el-form-item>
+        <el-form-item label="目标受众" prop="audience">
+          <el-input v-model="form.audience" placeholder="例如：大学生、新手博主、职场新人" clearable />
+        </el-form-item>
 
-          <el-form-item label="目标受众">
-            <el-input v-model="form.audience" placeholder="例如：大学生、新手博主、职场新人" clearable />
-          </el-form-item>
+        <el-button class="full-width" type="primary" size="large" :loading="loading" @click="generate">
+          生成创作方案
+        </el-button>
+      </el-form>
+    </section>
 
-          <el-button class="full-width" type="primary" size="large" :loading="loading" @click="generate">
-            生成创作方案
-          </el-button>
-        </el-form>
-      </section>
+    <section class="create-results">
+      <div v-if="!result" class="empty-state">
+        <h2>等待生成</h2>
+        <p>生成后会在这里展示标题推荐、口播文案、分镜脚本、标签和发布建议。</p>
+      </div>
 
-      <section class="create-results">
-        <div v-if="!result" class="empty-state">
-          <h2>等待生成</h2>
-          <p>生成后会展示标题推荐、口播文案、分镜脚本、标签和发布建议。</p>
-        </div>
+      <template v-else>
+        <ResultCard title="标题推荐">
+          <template #extra>
+            <el-tag type="primary">已选：{{ result.selectedTitle }}</el-tag>
+          </template>
+          <ol class="title-list">
+            <li v-for="title in result.titles" :key="title">{{ title }}</li>
+          </ol>
+        </ResultCard>
 
-        <template v-else>
-          <el-card class="result-card" shadow="never">
-            <template #header>
-              <div class="card-header">
-                <span>标题推荐</span>
-                <el-tag type="primary">已选：{{ result.selectedTitle }}</el-tag>
-              </div>
-            </template>
-            <ol class="title-list">
-              <li v-for="title in result.titles" :key="title">{{ title }}</li>
-            </ol>
-          </el-card>
+        <ResultCard title="口播文案">
+          <p class="script">{{ result.speechScript }}</p>
+        </ResultCard>
 
-          <el-card class="result-card" shadow="never">
-            <template #header>口播文案</template>
-            <p class="script">{{ result.speechScript }}</p>
-          </el-card>
+        <ResultCard title="分镜脚本">
+          <StoryboardTable :items="result.storyboard" />
+        </ResultCard>
 
-          <el-card class="result-card" shadow="never">
-            <template #header>分镜脚本</template>
-            <el-table :data="result.storyboard" border>
-              <el-table-column prop="sceneNo" label="镜头编号" width="90" />
-              <el-table-column prop="timeRange" label="时间范围" width="100" />
-              <el-table-column prop="visual" label="画面内容" min-width="180" />
-              <el-table-column prop="voiceover" label="口播内容" min-width="220" />
-              <el-table-column prop="subtitle" label="字幕建议" min-width="160" />
-              <el-table-column prop="camera" label="镜头建议" min-width="180" />
-            </el-table>
-          </el-card>
+        <ResultCard title="标签">
+          <TagList :tags="result.tags" />
+        </ResultCard>
 
-          <el-card class="result-card" shadow="never">
-            <template #header>标签</template>
-            <el-tag v-for="tag in result.tags" :key="tag" class="tag-item" type="success">
-              {{ tag }}
-            </el-tag>
-          </el-card>
-
-          <el-card class="result-card" shadow="never">
-            <template #header>发布建议</template>
-            <el-descriptions :column="1" border>
-              <el-descriptions-item label="推荐发布时间">
-                {{ result.publishAdvice.bestTime }}
-              </el-descriptions-item>
-              <el-descriptions-item label="封面文案">
-                {{ result.publishAdvice.coverText }}
-              </el-descriptions-item>
-              <el-descriptions-item label="互动引导语">
-                {{ result.publishAdvice.interactionGuide }}
-              </el-descriptions-item>
-              <el-descriptions-item label="平台发布建议">
-                {{ result.publishAdvice.platformAdvice }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </el-card>
-        </template>
-      </section>
-    </main>
+        <ResultCard title="发布建议">
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="推荐发布时间">
+              {{ result.publishAdvice.bestTime }}
+            </el-descriptions-item>
+            <el-descriptions-item label="封面文案">
+              {{ result.publishAdvice.coverText }}
+            </el-descriptions-item>
+            <el-descriptions-item label="互动引导语">
+              {{ result.publishAdvice.interactionGuide }}
+            </el-descriptions-item>
+            <el-descriptions-item label="平台发布建议">
+              {{ result.publishAdvice.platformAdvice }}
+            </el-descriptions-item>
+          </el-descriptions>
+        </ResultCard>
+      </template>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import ResultCard from '../components/ResultCard.vue';
+import StoryboardTable from '../components/StoryboardTable.vue';
+import TagList from '../components/TagList.vue';
 import request from '../utils/request';
 
 const platforms = ['抖音', '小红书', 'B站', '视频号'];
 const styles = ['知识科普', '生活分享', '产品种草', '剧情口播'];
+const formRef = ref(null);
 const loading = ref(false);
 const result = ref(null);
 
@@ -137,16 +112,17 @@ const form = reactive({
   audience: ''
 });
 
-function validateForm() {
-  if (!form.topic.trim() || !form.audience.trim()) {
-    ElMessage.warning('请填写视频主题和目标受众');
-    return false;
-  }
-  return true;
-}
+const rules = {
+  topic: [{ required: true, message: '请输入视频主题', trigger: 'blur' }],
+  platform: [{ required: true, message: '请选择发布平台', trigger: 'change' }],
+  style: [{ required: true, message: '请选择内容风格', trigger: 'change' }],
+  duration: [{ required: true, message: '请选择视频时长', trigger: 'change' }],
+  audience: [{ required: true, message: '请输入目标受众', trigger: 'blur' }]
+};
 
 async function generate() {
-  if (!validateForm()) return;
+  const valid = await formRef.value.validate().catch(() => false);
+  if (!valid) return;
 
   loading.value = true;
   try {
@@ -158,11 +134,5 @@ async function generate() {
   } finally {
     loading.value = false;
   }
-}
-
-function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  location.href = '/login';
 }
 </script>

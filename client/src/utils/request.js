@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ElMessage } from 'element-plus';
 
 const request = axios.create({
   baseURL: '/api',
@@ -22,6 +23,8 @@ request.interceptors.response.use(
     if (status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      ElMessage.error('登录状态已失效，请重新登录');
+
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
