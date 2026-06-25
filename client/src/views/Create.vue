@@ -51,11 +51,14 @@
         <div class="save-bar">
           <div>
             <strong>生成结果</strong>
-            <span>{{ saved ? '当前方案已保存到数据库' : '保存后可在历史记录中查看' }}</span>
+            <span>{{ modeText }}。{{ saved ? '当前方案已保存到数据库' : '保存后可在历史记录中查看' }}</span>
           </div>
-          <el-button type="success" :loading="saving" :disabled="saved" @click="saveResult">
-            {{ saved ? '已保存' : '保存创作方案' }}
-          </el-button>
+          <div class="save-actions">
+            <el-tag :type="modeTagType">{{ modeLabel }}</el-tag>
+            <el-button type="success" :loading="saving" :disabled="saved" @click="saveResult">
+              {{ saved ? '已保存' : '保存创作方案' }}
+            </el-button>
+          </div>
         </div>
 
         <ResultCard title="标题推荐">
@@ -101,7 +104,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import ResultCard from '../components/ResultCard.vue';
 import StoryboardTable from '../components/StoryboardTable.vue';
@@ -115,6 +118,7 @@ const loading = ref(false);
 const saving = ref(false);
 const saved = ref(false);
 const result = ref(null);
+const generationMode = ref('template');
 
 const form = reactive({
   topic: '',
@@ -132,6 +136,27 @@ const rules = {
   audience: [{ required: true, message: '请输入目标受众', trigger: 'blur' }]
 };
 
+const modeLabelMap = {
+  ai: 'AI 智能生成',
+  template: '模板规则生成',
+  fallback_template: '兜底模板模式'
+};
+
+const modeTextMap = {
+  ai: '当前生成模式：AI 智能生成',
+  template: '当前生成模式：模板规则生成',
+  fallback_template: 'AI 调用失败，已自动切换为模板生成'
+};
+
+const modeTagType = computed(() => {
+  if (generationMode.value === 'ai') return 'success';
+  if (generationMode.value === 'fallback_template') return 'warning';
+  return 'info';
+});
+
+const modeLabel = computed(() => modeLabelMap[generationMode.value] || modeLabelMap.template);
+const modeText = computed(() => modeTextMap[generationMode.value] || modeTextMap.template);
+
 async function generate() {
   const valid = await formRef.value.validate().catch(() => false);
   if (!valid) return;
@@ -140,6 +165,7 @@ async function generate() {
   try {
     const res = await request.post('/creation/generate', form);
     result.value = res.data;
+    generationMode.value = res.generationMode || 'template';
     saved.value = false;
     ElMessage.success('创作方案已生成');
   } catch (error) {

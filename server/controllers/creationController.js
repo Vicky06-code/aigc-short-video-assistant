@@ -9,8 +9,12 @@ import {
 
 export async function generateCreation(req, res, next) {
   try {
-    const data = await generateCreationPlan(req.body);
-    res.json({ success: true, data });
+    const result = await generateCreationPlan(req.body);
+    res.json({
+      success: true,
+      generationMode: result.generationMode,
+      data: result.data
+    });
   } catch (error) {
     next(error);
   }
