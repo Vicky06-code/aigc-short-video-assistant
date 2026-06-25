@@ -2,6 +2,7 @@ import express from 'express';
 import {
   clearCreationHistory,
   deleteCreation,
+  deleteCreationBatch,
   generateCreation,
   getCreationDetail,
   getCreationHistory,
@@ -18,6 +19,7 @@ router.post('/save', saveCreationRecord);
 router.get('/history', getCreationHistory);
 router.get('/detail/:id', getCreationDetail);
 router.delete('/all', clearCreationHistory);
+router.delete('/batch', deleteCreationBatch);
 router.delete('/:id', deleteCreation);
 
 export default router;

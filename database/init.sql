@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS creations (
   storyboard_json JSON NOT NULL,
   tags_json JSON NOT NULL,
   publish_advice_json JSON NOT NULL,
+  generation_mode VARCHAR(30) DEFAULT 'template',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_creations_user

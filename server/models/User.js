@@ -26,9 +26,21 @@ async function create({ username, email, passwordHash }) {
   return result.insertId;
 }
 
+async function updateUsername(id, username) {
+  await pool.query('UPDATE users SET username = ? WHERE id = ?', [username, id]);
+  return findById(id);
+}
+
+async function updatePassword(id, passwordHash) {
+  await pool.query('UPDATE users SET password = ? WHERE id = ?', [passwordHash, id]);
+  return true;
+}
+
 export default {
   findByUsername,
   findByEmail,
   findById,
-  create
+  create,
+  updateUsername,
+  updatePassword
 };

@@ -1,10 +1,16 @@
+import { logError } from '../utils/logger.js';
+
 function isDatabaseConnectionError(err) {
   return err?.code === 'ECONNREFUSED' || err?.errors?.some((item) => item.code === 'ECONNREFUSED');
 }
 
 export default function errorHandler(err, req, res, next) {
   if (!err.status || err.status >= 500) {
-    console.error(err);
+    logError('Request failed', err, {
+      method: req.method,
+      path: req.originalUrl,
+      userId: req.user?.id
+    });
   }
 
   if (isDatabaseConnectionError(err)) {

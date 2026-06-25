@@ -6,6 +6,15 @@
         <p>填写基础信息后，系统会生成适合不同平台的短视频创作方案，并可保存到数据库。</p>
       </div>
 
+      <el-alert
+        v-if="isDemo"
+        class="demo-alert"
+        title="课程演示模式已启用，系统已自动填充答辩示例。"
+        type="success"
+        show-icon
+        :closable="false"
+      />
+
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
         <el-form-item label="视频主题" prop="topic">
           <el-input v-model="form.topic" placeholder="例如：大学生如何提高学习效率" clearable />
@@ -35,14 +44,25 @@
           <el-input v-model="form.audience" placeholder="例如：大学生、新手博主、职场新人" clearable />
         </el-form-item>
 
-        <el-button class="full-width" type="primary" size="large" :loading="loading" @click="generate">
-          生成创作方案
-        </el-button>
+        <div class="form-actions">
+          <el-button class="full-width" type="primary" size="large" :loading="loading" :disabled="loading" @click="generate">
+            {{ loading ? '正在生成...' : '生成创作方案' }}
+          </el-button>
+          <el-button v-if="result" size="large" :disabled="loading" @click="generate">
+            重新生成
+          </el-button>
+        </div>
       </el-form>
     </section>
 
-    <section class="create-results">
-      <div v-if="!result" class="empty-state">
+    <section ref="resultSection" class="create-results">
+      <div v-if="loading" class="empty-state">
+        <el-icon class="loading-icon"><Loading /></el-icon>
+        <h2>正在生成</h2>
+        <p>系统正在组合标题、口播、分镜、标签和发布建议，请稍等。</p>
+      </div>
+
+      <div v-else-if="!result" class="empty-state">
         <h2>等待生成</h2>
         <p>生成后会在这里展示标题推荐、口播文案、分镜脚本、标签和发布建议。</p>
       </div>
@@ -55,6 +75,7 @@
           </div>
           <div class="save-actions">
             <el-tag :type="modeTagType">{{ modeLabel }}</el-tag>
+            <el-button @click="copyAll">一键复制全部内容</el-button>
             <el-button type="success" :loading="saving" :disabled="saved" @click="saveResult">
               {{ saved ? '已保存' : '保存创作方案' }}
             </el-button>
@@ -84,18 +105,10 @@
 
         <ResultCard title="发布建议">
           <el-descriptions :column="1" border>
-            <el-descriptions-item label="推荐发布时间">
-              {{ result.publishAdvice.bestTime }}
-            </el-descriptions-item>
-            <el-descriptions-item label="封面文案">
-              {{ result.publishAdvice.coverText }}
-            </el-descriptions-item>
-            <el-descriptions-item label="互动引导语">
-              {{ result.publishAdvice.interactionGuide }}
-            </el-descriptions-item>
-            <el-descriptions-item label="平台发布建议">
-              {{ result.publishAdvice.platformAdvice }}
-            </el-descriptions-item>
+            <el-descriptions-item label="推荐发布时间">{{ result.publishAdvice.bestTime }}</el-descriptions-item>
+            <el-descriptions-item label="封面文案">{{ result.publishAdvice.coverText }}</el-descriptions-item>
+            <el-descriptions-item label="互动引导语">{{ result.publishAdvice.interactionGuide }}</el-descriptions-item>
+            <el-descriptions-item label="平台发布建议">{{ result.publishAdvice.platformAdvice }}</el-descriptions-item>
           </el-descriptions>
         </ResultCard>
       </template>
@@ -104,8 +117,10 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { Loading } from '@element-plus/icons-vue';
 import ResultCard from '../components/ResultCard.vue';
 import StoryboardTable from '../components/StoryboardTable.vue';
 import TagList from '../components/TagList.vue';
@@ -113,12 +128,16 @@ import request from '../utils/request';
 
 const platforms = ['抖音', '小红书', 'B站', '视频号'];
 const styles = ['知识科普', '生活分享', '产品种草', '剧情口播'];
+const route = useRoute();
 const formRef = ref(null);
+const resultSection = ref(null);
 const loading = ref(false);
 const saving = ref(false);
 const saved = ref(false);
 const result = ref(null);
 const generationMode = ref('template');
+
+const isDemo = computed(() => route.query.demo === '1');
 
 const form = reactive({
   topic: '',
@@ -157,19 +176,35 @@ const modeTagType = computed(() => {
 const modeLabel = computed(() => modeLabelMap[generationMode.value] || modeLabelMap.template);
 const modeText = computed(() => modeTextMap[generationMode.value] || modeTextMap.template);
 
+function fillDemoForm() {
+  form.topic = '大学生如何提高学习效率';
+  form.platform = '小红书';
+  form.style = '知识科普';
+  form.duration = 30;
+  form.audience = '大学生';
+}
+
+async function scrollToResult() {
+  await nextTick();
+  resultSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 async function generate() {
+  if (loading.value) return;
+
   const valid = await formRef.value.validate().catch(() => false);
   if (!valid) return;
 
   loading.value = true;
+  saved.value = false;
   try {
-    const res = await request.post('/creation/generate', form);
+    const res = await request.post('/creation/generate', { ...form });
     result.value = res.data;
     generationMode.value = res.generationMode || 'template';
-    saved.value = false;
     ElMessage.success('创作方案已生成');
+    await scrollToResult();
   } catch (error) {
-    ElMessage.error(error.message);
+    ElMessage.error(error.message || '生成失败，请稍后重试');
   } finally {
     loading.value = false;
   }
@@ -186,14 +221,57 @@ async function saveResult() {
       speechScript: result.value.speechScript,
       storyboard: result.value.storyboard,
       tags: result.value.tags,
-      publishAdvice: result.value.publishAdvice
+      publishAdvice: result.value.publishAdvice,
+      generationMode: generationMode.value
     });
     saved.value = true;
     ElMessage.success('保存成功，可在历史记录中查看');
   } catch (error) {
-    ElMessage.error(error.message);
+    ElMessage.error(error.message || '保存失败');
   } finally {
     saving.value = false;
   }
 }
+
+async function copyAll() {
+  if (!result.value) return;
+
+  const storyboardText = result.value.storyboard
+    .map((item) => `${item.sceneNo}. ${item.timeRange}｜${item.visual}｜${item.voiceover}｜${item.subtitle}｜${item.camera}`)
+    .join('\n');
+
+  const text = [
+    `主题：${form.topic}`,
+    `平台：${form.platform}`,
+    `风格：${form.style}`,
+    `时长：${form.duration}秒`,
+    `目标受众：${form.audience}`,
+    '',
+    '标题推荐：',
+    ...(result.value.titles || []).map((title, index) => `${index + 1}. ${title}`),
+    '',
+    `口播文案：\n${result.value.speechScript}`,
+    '',
+    `分镜脚本：\n${storyboardText}`,
+    '',
+    `标签：${(result.value.tags || []).join(' ')}`,
+    '',
+    '发布建议：',
+    `推荐发布时间：${result.value.publishAdvice.bestTime}`,
+    `封面文案：${result.value.publishAdvice.coverText}`,
+    `互动引导语：${result.value.publishAdvice.interactionGuide}`,
+    `平台发布建议：${result.value.publishAdvice.platformAdvice}`
+  ].join('\n');
+
+  await navigator.clipboard.writeText(text);
+  ElMessage.success('已复制全部创作内容');
+}
+
+onMounted(async () => {
+  if (isDemo.value) {
+    fillDemoForm();
+    await nextTick();
+    generate();
+  }
+});
 </script>

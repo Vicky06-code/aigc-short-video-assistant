@@ -29,6 +29,7 @@ function normalizeRecord(row) {
     storyboard: parseJson(row.storyboard_json, []),
     tags: parseJson(row.tags_json, []),
     publishAdvice: parseJson(row.publish_advice_json, {}),
+    generationMode: row.generation_mode || 'template',
     created_at: row.created_at,
     updated_at: row.updated_at
   };
@@ -47,8 +48,9 @@ export async function saveCreation(userId, payload) {
 
   const [result] = await pool.query(
     `INSERT INTO creations
-      (user_id, topic, platform, style, duration, audience, titles_json, speech_script, storyboard_json, tags_json, publish_advice_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (user_id, topic, platform, style, duration, audience, titles_json, speech_script,
+       storyboard_json, tags_json, publish_advice_json, generation_mode)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       userId,
       payload.topic,
@@ -60,7 +62,8 @@ export async function saveCreation(userId, payload) {
       payload.speechScript,
       JSON.stringify(payload.storyboard || []),
       JSON.stringify(payload.tags || []),
-      JSON.stringify(payload.publishAdvice || {})
+      JSON.stringify(payload.publishAdvice || {}),
+      payload.generationMode || 'template'
     ]
   );
 
@@ -69,7 +72,7 @@ export async function saveCreation(userId, payload) {
 
 export async function getHistory(userId) {
   const [rows] = await pool.query(
-    `SELECT id, topic, platform, style, duration, created_at
+    `SELECT id, topic, platform, style, duration, generation_mode, created_at
      FROM creations
      WHERE user_id = ?
      ORDER BY created_at DESC`,
@@ -82,7 +85,7 @@ export async function getHistory(userId) {
 export async function getHistoryDetail(userId, id) {
   const [rows] = await pool.query(
     `SELECT id, topic, platform, style, duration, audience, titles_json, speech_script,
-            storyboard_json, tags_json, publish_advice_json, created_at, updated_at
+            storyboard_json, tags_json, publish_advice_json, generation_mode, created_at, updated_at
      FROM creations
      WHERE id = ? AND user_id = ?
      LIMIT 1`,
@@ -104,6 +107,25 @@ export async function deleteHistory(userId, id) {
   }
 
   return true;
+}
+
+export async function deleteHistoryBatch(userId, ids) {
+  if (!Array.isArray(ids) || ids.length === 0) {
+    throw createHttpError(400, '请选择要删除的历史记录');
+  }
+
+  const normalizedIds = ids.map((id) => Number.parseInt(id, 10)).filter(Number.isInteger);
+  if (normalizedIds.length === 0) {
+    throw createHttpError(400, '历史记录 ID 不合法');
+  }
+
+  const placeholders = normalizedIds.map(() => '?').join(',');
+  const [result] = await pool.query(
+    `DELETE FROM creations WHERE user_id = ? AND id IN (${placeholders})`,
+    [userId, ...normalizedIds]
+  );
+
+  return result.affectedRows;
 }
 
 export async function clearHistory(userId) {

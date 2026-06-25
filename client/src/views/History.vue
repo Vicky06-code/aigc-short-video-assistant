@@ -7,7 +7,7 @@
       </div>
       <div class="history-actions">
         <el-button type="primary" @click="$router.push('/create')">新建创作</el-button>
-        <el-button type="danger" plain :disabled="records.length === 0" @click="clearAll">清空全部历史记录</el-button>
+        <el-button type="danger" plain :disabled="records.length === 0" @click="clearAll">清空全部</el-button>
       </div>
     </div>
 
@@ -25,17 +25,33 @@
       </el-select>
     </div>
 
-    <el-table :data="filteredRecords" v-loading="loading" border>
-      <el-table-column prop="topic" label="主题" min-width="200" />
+    <div class="batch-bar">
+      <span class="muted">已选择 {{ selectedRows.length }} 条，共 {{ filteredRecords.length }} 条匹配记录</span>
+      <el-button type="danger" plain :disabled="selectedRows.length === 0" @click="removeBatch">批量删除</el-button>
+    </div>
+
+    <el-table
+      :data="pagedRecords"
+      v-loading="loading"
+      border
+      @selection-change="selectedRows = $event"
+    >
+      <el-table-column type="selection" width="48" />
+      <el-table-column prop="topic" label="主题" min-width="220" show-overflow-tooltip />
       <el-table-column prop="platform" label="平台" width="110" />
       <el-table-column prop="style" label="风格" width="130" />
       <el-table-column prop="duration" label="时长" width="100">
         <template #default="{ row }">{{ row.duration }} 秒</template>
       </el-table-column>
+      <el-table-column prop="generationMode" label="模式" width="130">
+        <template #default="{ row }">
+          <el-tag :type="modeTag(row.generationMode)" size="small">{{ modeText(row.generationMode) }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="created_at" label="创建时间" min-width="180">
         <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="160">
+      <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="viewDetail(row)">查看</el-button>
           <el-button link type="danger" @click="remove(row)">删除</el-button>
@@ -44,6 +60,16 @@
     </el-table>
 
     <el-empty v-if="!loading && filteredRecords.length === 0" description="暂无匹配的历史记录" />
+
+    <div v-if="filteredRecords.length > 0" class="pagination-bar">
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :page-sizes="[5, 10, 20]"
+        :total="filteredRecords.length"
+      />
+    </div>
 
     <el-drawer v-model="drawerVisible" size="58%" title="创作方案详情">
       <div v-loading="detailLoading">
@@ -92,7 +118,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import ResultCard from '../components/ResultCard.vue';
 import StoryboardTable from '../components/StoryboardTable.vue';
@@ -107,6 +133,7 @@ const detailLoading = ref(false);
 const drawerVisible = ref(false);
 const records = ref([]);
 const detail = ref(null);
+const selectedRows = ref([]);
 
 const filters = reactive({
   keyword: '',
@@ -115,9 +142,14 @@ const filters = reactive({
   order: 'desc'
 });
 
+const pagination = reactive({
+  page: 1,
+  pageSize: 10
+});
+
 const filteredRecords = computed(() => {
   return [...records.value]
-    .filter((item) => !filters.keyword || item.topic.includes(filters.keyword))
+    .filter((item) => !filters.keyword || item.topic.includes(filters.keyword.trim()))
     .filter((item) => !filters.platform || item.platform === filters.platform)
     .filter((item) => !filters.style || item.style === filters.style)
     .sort((a, b) => {
@@ -127,9 +159,31 @@ const filteredRecords = computed(() => {
     });
 });
 
+const pagedRecords = computed(() => {
+  const start = (pagination.page - 1) * pagination.pageSize;
+  return filteredRecords.value.slice(start, start + pagination.pageSize);
+});
+
+watch(filteredRecords, () => {
+  pagination.page = 1;
+  selectedRows.value = [];
+});
+
 function formatTime(value) {
   if (!value) return '-';
   return new Date(value).toLocaleString();
+}
+
+function modeText(mode) {
+  if (mode === 'ai') return 'AI';
+  if (mode === 'fallback_template') return '兜底模板';
+  return '模板';
+}
+
+function modeTag(mode) {
+  if (mode === 'ai') return 'success';
+  if (mode === 'fallback_template') return 'warning';
+  return 'info';
 }
 
 async function loadRecords() {
@@ -164,7 +218,18 @@ async function remove(row) {
   try {
     await request.delete(`/creation/${row.id}`);
     ElMessage.success('删除成功');
-    loadRecords();
+    await loadRecords();
+  } catch (error) {
+    ElMessage.error(error.message);
+  }
+}
+
+async function removeBatch() {
+  await ElMessageBox.confirm(`确认删除选中的 ${selectedRows.value.length} 条记录吗？`, '批量删除确认', { type: 'warning' });
+  try {
+    await request.delete('/creation/batch', { data: { ids: selectedRows.value.map((item) => item.id) } });
+    ElMessage.success('批量删除成功');
+    await loadRecords();
   } catch (error) {
     ElMessage.error(error.message);
   }
@@ -175,7 +240,7 @@ async function clearAll() {
   try {
     await request.delete('/creation/all');
     ElMessage.success('已清空全部历史记录');
-    loadRecords();
+    await loadRecords();
   } catch (error) {
     ElMessage.error(error.message);
   }

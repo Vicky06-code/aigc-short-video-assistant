@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { buildCreationPrompt } from '../utils/promptBuilder.js';
+import { logInfo } from '../utils/logger.js';
 
 function stripJsonFence(content) {
   return content
@@ -52,6 +53,12 @@ export async function generateWithAi(input) {
   }
 
   const prompt = buildCreationPrompt(input);
+  logInfo('AI generation requested', {
+    provider: config.provider,
+    model: config.model,
+    platform: input.platform,
+    duration: input.duration
+  });
   const response = await axios.post(
     `${config.baseUrl}/chat/completions`,
     {
