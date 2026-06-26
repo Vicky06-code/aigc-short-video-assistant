@@ -7,7 +7,13 @@ function createHttpError(status, message) {
   return error;
 }
 
-function getGenerationMode() {
+function getGenerationMode(input = {}) {
+  if (input.generationMode === 'ai' || input.generationMode === 'template') {
+    return input.generationMode;
+  }
+  if (input.generationModePreference === 'ai' || input.generationModePreference === 'template') {
+    return input.generationModePreference;
+  }
   return process.env.GENERATION_MODE === 'ai' ? 'ai' : 'template';
 }
 
@@ -18,7 +24,7 @@ export async function generateCreationPlan(input) {
   }
 
   const normalizedInput = validation.value;
-  const mode = getGenerationMode();
+  const mode = getGenerationMode(input);
 
   if (mode === 'template') {
     return {
@@ -36,6 +42,7 @@ export async function generateCreationPlan(input) {
     console.warn(`AI generation failed, fallback to template: ${error.message}`);
     return {
       generationMode: 'fallback_template',
+      fallbackReason: error.message,
       data: generateByTemplate(normalizedInput)
     };
   }

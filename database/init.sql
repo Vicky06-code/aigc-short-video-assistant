@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS creations (
   style VARCHAR(50) NOT NULL,
   duration VARCHAR(20) NOT NULL,
   audience VARCHAR(255) NOT NULL,
+  creative_requirement TEXT NULL,
   titles_json JSON NOT NULL,
   speech_script TEXT NOT NULL,
   storyboard_json JSON NOT NULL,
@@ -35,3 +36,17 @@ CREATE TABLE IF NOT EXISTS creations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX idx_creations_user_created_at ON creations(user_id, created_at);
+
+CREATE TABLE IF NOT EXISTS password_reset_codes (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  email VARCHAR(120) NOT NULL,
+  code_hash VARCHAR(255) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  used_at DATETIME DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_password_reset_email_created_at (email, created_at),
+  CONSTRAINT fk_password_reset_user
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

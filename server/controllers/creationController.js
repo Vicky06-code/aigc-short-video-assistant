@@ -21,6 +21,7 @@ export async function generateCreation(req, res, next) {
     res.json({
       success: true,
       generationMode: result.generationMode,
+      fallbackReason: result.fallbackReason,
       data: result.data
     });
   } catch (error) {

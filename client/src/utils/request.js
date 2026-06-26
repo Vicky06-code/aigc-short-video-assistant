@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus';
 
 const request = axios.create({
   baseURL: '/api',
-  timeout: 15000
+  timeout: 60000
 });
 
 request.interceptors.request.use((config) => {
@@ -18,7 +18,9 @@ request.interceptors.response.use(
   (response) => response.data,
   (error) => {
     const status = error.response?.status;
-    const message = error.response?.data?.message || '请求失败，请稍后重试';
+    const message = error.code === 'ECONNABORTED'
+      ? 'AI 生成时间较长，请稍后重试或切换模板模式'
+      : error.response?.data?.message || '请求失败，请稍后重试';
 
     if (status === 401) {
       localStorage.removeItem('token');

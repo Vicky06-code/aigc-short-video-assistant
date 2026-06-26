@@ -4,23 +4,23 @@
       <div class="brand-block">
         <div class="brand-mark">AI</div>
         <div>
-          <strong>短视频助手</strong>
-          <span>AIGC Creator</span>
+          <strong>{{ t('brandTitle') }}</strong>
+          <span>{{ t('brandSubTitle') }}</span>
         </div>
       </div>
 
       <el-menu :default-active="$route.path" router class="side-menu">
         <el-menu-item index="/dashboard">
-          <span>工作台</span>
+          <span>{{ t('navDashboard') }}</span>
         </el-menu-item>
         <el-menu-item index="/create">
-          <span>智能创作</span>
+          <span>{{ t('navCreate') }}</span>
         </el-menu-item>
         <el-menu-item index="/history">
-          <span>历史记录</span>
+          <span>{{ t('navHistory') }}</span>
         </el-menu-item>
         <el-menu-item index="/profile">
-          <span>个人中心</span>
+          <span>{{ t('navProfile') }}</span>
         </el-menu-item>
       </el-menu>
     </aside>
@@ -32,8 +32,9 @@
           <p>{{ pageSubtitle }}</p>
         </div>
         <div class="topbar-user">
-          <span>{{ user?.username || '创作者' }}</span>
-          <el-button type="primary" plain @click="$router.push('/create')">开始创作</el-button>
+          <LanguageSwitcher />
+          <span>{{ user?.username || t('creator') }}</span>
+          <el-button type="primary" plain @click="$router.push('/create')">{{ t('startCreate') }}</el-button>
         </div>
       </header>
 
@@ -47,8 +48,11 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import LanguageSwitcher from '../components/LanguageSwitcher.vue';
+import { useI18n } from '../i18n';
 
 const route = useRoute();
+const { t } = useI18n();
 const user = computed(() => {
   try {
     return JSON.parse(localStorage.getItem('user') || 'null');
@@ -58,13 +62,13 @@ const user = computed(() => {
 });
 
 const titleMap = {
-  '/dashboard': ['工作台', '查看系统能力与今日创作提示'],
-  '/create': ['智能创作', '输入选题信息，生成完整短视频方案'],
-  '/history': ['历史记录', '管理已生成的创作方案'],
-  '/profile': ['个人中心', '查看账号信息与系统说明']
+  '/dashboard': ['pageDashboardTitle', 'pageDashboardSub'],
+  '/create': ['pageCreateTitle', 'pageCreateSub'],
+  '/history': ['pageHistoryTitle', 'pageHistorySub'],
+  '/profile': ['pageProfileTitle', 'pageProfileSub']
 };
 
 const pageInfo = computed(() => titleMap[route.path] || titleMap['/dashboard']);
-const pageTitle = computed(() => pageInfo.value[0]);
-const pageSubtitle = computed(() => pageInfo.value[1]);
+const pageTitle = computed(() => t(pageInfo.value[0]));
+const pageSubtitle = computed(() => t(pageInfo.value[1]));
 </script>

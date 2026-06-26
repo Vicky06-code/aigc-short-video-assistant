@@ -1,29 +1,32 @@
 <template>
   <div class="auth-page">
+    <div class="auth-language">
+      <LanguageSwitcher />
+    </div>
     <div class="auth-panel">
-      <h1>创建账号</h1>
-      <p>注册后即可保存登录状态，进入完整的短视频创作工作台。</p>
+      <h1>{{ t('registerTitle') }}</h1>
+      <p>{{ t('registerIntro') }}</p>
 
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent>
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" placeholder="请输入用户名" clearable />
+        <el-form-item :label="t('username')" prop="username">
+          <el-input v-model="form.username" :placeholder="t('inputUsername')" clearable />
         </el-form-item>
 
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="form.email" placeholder="请输入邮箱" clearable />
+        <el-form-item :label="t('email')" prop="email">
+          <el-input v-model="form.email" :placeholder="t('inputEmail')" clearable />
         </el-form-item>
 
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" type="password" placeholder="至少 6 位" show-password />
+        <el-form-item :label="t('password')" prop="password">
+          <el-input v-model="form.password" type="password" :placeholder="t('passwordRule')" show-password />
         </el-form-item>
 
-        <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="form.confirmPassword" type="password" placeholder="请再次输入密码" show-password />
+        <el-form-item :label="t('confirmPassword')" prop="confirmPassword">
+          <el-input v-model="form.confirmPassword" type="password" :placeholder="t('inputConfirmPassword')" show-password />
         </el-form-item>
 
         <div class="auth-actions">
-          <el-button type="primary" size="large" :loading="loading" @click="submit">注册</el-button>
-          <el-button link @click="$router.push('/login')">已有账号？去登录</el-button>
+          <el-button type="primary" size="large" :loading="loading" @click="submit">{{ t('register') }}</el-button>
+          <el-button link @click="$router.push('/login')">{{ t('goLogin') }}</el-button>
         </div>
       </el-form>
     </div>
@@ -31,12 +34,15 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
+import LanguageSwitcher from '../components/LanguageSwitcher.vue';
+import { useI18n } from '../i18n';
 import request from '../utils/request';
 
 const router = useRouter();
+const { t } = useI18n();
 const formRef = ref(null);
 const loading = ref(false);
 
@@ -49,30 +55,38 @@ const form = reactive({
 
 function validateConfirmPassword(rule, value, callback) {
   if (value !== form.password) {
-    callback(new Error('两次输入的密码不一致'));
+    callback(new Error(t('passwordNotMatch')));
     return;
   }
   callback();
 }
 
-const rules = {
+function validatePassword(rule, value, callback) {
+  if (!/^(?=.*[A-Za-z])(?=.*\d)[^\s]{8,20}$/.test(value || '')) {
+    callback(new Error(t('passwordRule')));
+    return;
+  }
+  callback();
+}
+
+const rules = computed(() => ({
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 2, max: 20, message: '用户名长度为 2 到 20 个字符', trigger: 'blur' }
+    { required: true, message: t('inputUsername'), trigger: 'blur' },
+    { min: 2, max: 20, message: '2-20', trigger: 'blur' }
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] }
+    { required: true, message: t('inputEmail'), trigger: 'blur' },
+    { type: 'email', message: t('emailInvalid'), trigger: ['blur', 'change'] }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少 6 位', trigger: 'blur' }
+    { required: true, message: t('inputPassword'), trigger: 'blur' },
+    { validator: validatePassword, trigger: ['blur', 'change'] }
   ],
   confirmPassword: [
-    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    { required: true, message: t('inputConfirmPassword'), trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: ['blur', 'change'] }
   ]
-};
+}));
 
 async function submit() {
   const valid = await formRef.value.validate().catch(() => false);
@@ -85,7 +99,7 @@ async function submit() {
       email: form.email,
       password: form.password
     });
-    ElMessage.success('注册成功，请登录');
+    ElMessage.success(t('registerSuccess'));
     router.push('/login');
   } catch (error) {
     ElMessage.error(error.message);

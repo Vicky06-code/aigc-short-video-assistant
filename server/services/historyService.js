@@ -24,6 +24,7 @@ function normalizeRecord(row) {
     style: row.style,
     duration: Number(row.duration),
     audience: row.audience,
+    creativeRequirement: row.creative_requirement || '',
     titles: parseJson(row.titles_json, []),
     speechScript: row.speech_script,
     storyboard: parseJson(row.storyboard_json, []),
@@ -33,6 +34,13 @@ function normalizeRecord(row) {
     created_at: row.created_at,
     updated_at: row.updated_at
   };
+}
+
+async function ensureCreativeRequirementColumn() {
+  const [columns] = await pool.query('SHOW COLUMNS FROM creations LIKE ?', ['creative_requirement']);
+  if (columns.length === 0) {
+    await pool.query('ALTER TABLE creations ADD COLUMN creative_requirement TEXT NULL AFTER audience');
+  }
 }
 
 export async function saveCreation(userId, payload) {
@@ -46,11 +54,13 @@ export async function saveCreation(userId, payload) {
     throw createHttpError(400, '生成结果不完整，无法保存');
   }
 
+  await ensureCreativeRequirementColumn();
+
   const [result] = await pool.query(
     `INSERT INTO creations
-      (user_id, topic, platform, style, duration, audience, titles_json, speech_script,
+      (user_id, topic, platform, style, duration, audience, creative_requirement, titles_json, speech_script,
        storyboard_json, tags_json, publish_advice_json, generation_mode)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       userId,
       payload.topic,
@@ -58,6 +68,7 @@ export async function saveCreation(userId, payload) {
       payload.style,
       payload.duration,
       payload.audience,
+      payload.creativeRequirement || '',
       JSON.stringify(payload.titles || []),
       payload.speechScript,
       JSON.stringify(payload.storyboard || []),
@@ -79,12 +90,22 @@ export async function getHistory(userId) {
     [userId]
   );
 
-  return rows;
+  return rows.map((row) => ({
+    id: row.id,
+    topic: row.topic,
+    platform: row.platform,
+    style: row.style,
+    duration: Number(row.duration),
+    generationMode: row.generation_mode || 'template',
+    created_at: row.created_at
+  }));
 }
 
 export async function getHistoryDetail(userId, id) {
+  await ensureCreativeRequirementColumn();
+
   const [rows] = await pool.query(
-    `SELECT id, topic, platform, style, duration, audience, titles_json, speech_script,
+    `SELECT id, topic, platform, style, duration, audience, creative_requirement, titles_json, speech_script,
             storyboard_json, tags_json, publish_advice_json, generation_mode, created_at, updated_at
      FROM creations
      WHERE id = ? AND user_id = ?

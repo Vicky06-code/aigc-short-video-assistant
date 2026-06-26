@@ -1,6 +1,15 @@
-# 基于 AIGC 的智能短视频内容创作辅助系统
+# AIGC 智能短视频内容创作辅助系统
 
-这是一个课程大作业 MVP 项目，目标是在 8 天内完成可运行、可展示、可部署的智能短视频创作辅助系统。
+面向内容创作者、品牌营销人员和短视频运营团队的智能创作辅助系统。系统提供从选题输入、标题生成、口播文案、分镜脚本、标签建议、发布时间建议到历史记录管理的一站式工作流，目标是支持真实业务场景下的短视频内容策划、生产和复用。
+
+## 产品定位
+
+本项目定位为一个可继续上线迭代的 Web 产品原型：
+
+- 面向真实用户：创作者、内容运营、品牌营销、新媒体团队
+- 面向真实流程：创意输入、AI 生成、方案保存、历史复用、账号管理
+- 面向真实部署：前后端分离、MySQL 持久化、JWT 鉴权、环境变量配置、可接入真实大模型 API
+- 面向可扩展架构：模板生成可作为稳定降级能力，AI 生成可接入 DeepSeek/OpenAI 等模型服务
 
 ## 技术栈
 
@@ -10,15 +19,17 @@
 - 鉴权：JWT
 - AIGC：规则模板生成 + DeepSeek API AI 生成
 
-## 已完成阶段
+## 核心功能
 
-- 第一阶段：项目骨架
-- 第二阶段：用户注册、登录、JWT 鉴权
-- 第三阶段：规则模板版 AIGC 创作生成
-- 第四阶段：完整后台式前端界面
-- 第五阶段：创作历史记录持久化到 MySQL
-- 第六阶段：真实 AI API + 模板兜底双模式生成
-- 第七阶段：系统体验优化、安全优化、日志、部署准备、课程演示模式
+- 用户注册、登录、JWT 鉴权、个人资料维护
+- 智能短视频方案生成
+- 模板模式与 AI 模式双生成能力
+- AI 调用失败后的模板降级
+- 创作方案保存到 MySQL
+- 历史记录搜索、筛选、分页、查看详情、删除、批量删除
+- 多语言切换：简体中文、繁体中文、英语、德语
+- 一键复制生成结果
+- 快速体验入口，自动填充真实业务示例
 
 ## 目录结构
 
@@ -27,6 +38,7 @@ aigc-short-video-assistant/
 ├── client/
 │   ├── src/
 │   │   ├── components/
+│   │   ├── i18n/
 │   │   ├── layouts/
 │   │   ├── router/
 │   │   ├── styles/
@@ -39,6 +51,7 @@ aigc-short-video-assistant/
 │   ├── middleware/
 │   ├── models/
 │   ├── routes/
+│   ├── scripts/
 │   ├── services/
 │   ├── utils/
 │   ├── app.js
@@ -52,14 +65,14 @@ aigc-short-video-assistant/
 
 ## 环境变量
 
-后端启动前需要创建 `.env`：
+后端启动前创建 `.env`：
 
 ```bash
 cd server
 cp .env.example .env
 ```
 
-`.env.example` 示例：
+示例：
 
 ```env
 PORT=3000
@@ -78,25 +91,22 @@ AI_MODEL=deepseek-chat
 GENERATION_MODE=template
 ```
 
-安全说明：
+安全要求：
 
-- 真实 API Key 只能写在 `server/.env`
-- `.env` 已加入 `.gitignore`
-- 不要把真实 API Key 提交到 GitHub
+- 真实 API Key 只写入 `server/.env`
+- `.env` 不提交到 GitHub
+- 生产环境必须更换 `JWT_SECRET`
 
 ## 数据库初始化
 
+推荐使用项目脚本初始化：
+
 ```bash
-mysql -u root -p < database/init.sql
+cd server
+npm run db:init
 ```
 
-如果本地已经初始化过旧表，开发环境可以删除旧库后重建：
-
-```sql
-DROP DATABASE aigc_short_video;
-```
-
-然后重新执行：
+也可以使用 MySQL CLI：
 
 ```bash
 mysql -u root -p < database/init.sql
@@ -104,10 +114,12 @@ mysql -u root -p < database/init.sql
 
 主要数据表：
 
-- `users`：用户表，保存用户名、邮箱、bcrypt 加密密码
-- `creations`：创作记录表，保存标题、口播、分镜、标签、发布建议和生成模式
+- `users`：用户信息，密码使用 bcrypt 加密
+- `creations`：创作记录，保存标题、口播、分镜、标签、发布建议和生成模式
 
-## 后端运行
+## 本地运行
+
+后端：
 
 ```bash
 cd server
@@ -121,7 +133,7 @@ npm start
 http://localhost:3000
 ```
 
-## 前端运行
+前端：
 
 ```bash
 cd client
@@ -135,8 +147,6 @@ npm run dev
 http://localhost:5173
 ```
 
-前端 Vite 已配置代理，页面请求 `/api` 会转发到后端 `http://localhost:3000`。
-
 ## 生成模式
 
 模板模式：
@@ -145,56 +155,49 @@ http://localhost:5173
 GENERATION_MODE=template
 ```
 
-特点：
+适用场景：
 
-- 不依赖网络
-- 不需要 API Key
-- 生成稳定
-- 适合答辩现场兜底演示
+- 无外部模型服务时稳定生成
+- AI 服务异常时自动降级
+- 对成本和响应稳定性要求较高的场景
 
 AI 模式：
 
 ```env
 GENERATION_MODE=ai
 AI_PROVIDER=deepseek
-AI_API_KEY=你的 DeepSeek API Key
+AI_API_KEY=your_deepseek_api_key
 AI_BASE_URL=https://api.deepseek.com
 AI_MODEL=deepseek-chat
 ```
 
-特点：
+适用场景：
 
-- 调用 DeepSeek 真实大模型 API
-- 输出更自然
-- 如果 API Key 缺失、接口失败或 JSON 解析失败，会自动回退到模板模式
-
-答辩建议：
-
-- 平时录屏和演示可使用 AI 模式
-- 答辩现场建议保留模板模式作为兜底
-- 工作台点击“课程演示”会自动填充示例并跳转生成
+- 追求更自然、更丰富的生成结果
+- 面向真实内容生产和运营提效
+- 后续可扩展到 OpenAI、通义千问、智谱等模型
 
 ## 主要 API
 
 认证接口：
 
-- `POST /api/auth/register`：注册
-- `POST /api/auth/login`：登录
-- `GET /api/auth/profile`：当前用户
-- `PUT /api/auth/profile`：修改用户名
-- `PUT /api/auth/password`：修改密码
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/profile`
+- `PUT /api/auth/profile`
+- `PUT /api/auth/password`
 
 创作接口：
 
-- `POST /api/creation/generate`：生成创作方案
-- `POST /api/creation/save`：保存创作方案
-- `GET /api/creation/history`：查询当前用户历史记录
-- `GET /api/creation/detail/:id`：查询单条完整记录
-- `DELETE /api/creation/:id`：删除单条记录
-- `DELETE /api/creation/batch`：批量删除记录
-- `DELETE /api/creation/all`：清空当前用户全部记录
+- `POST /api/creation/generate`
+- `POST /api/creation/save`
+- `GET /api/creation/history`
+- `GET /api/creation/detail/:id`
+- `DELETE /api/creation/:id`
+- `DELETE /api/creation/batch`
+- `DELETE /api/creation/all`
 
-所有内部接口统一返回：
+统一成功响应：
 
 ```json
 {
@@ -203,7 +206,7 @@ AI_MODEL=deepseek-chat
 }
 ```
 
-失败返回：
+统一失败响应：
 
 ```json
 {
@@ -214,27 +217,27 @@ AI_MODEL=deepseek-chat
 
 ## 前端页面
 
-- `/login`：登录页
-- `/register`：注册页
-- `/dashboard`：工作台，含统计卡片和课程演示入口
-- `/create`：智能创作页，支持生成、重新生成、保存、一键复制
-- `/history`：历史记录页，支持搜索、筛选、排序、分页、查看详情、删除、批量删除
-- `/profile`：个人中心，支持查看信息、修改用户名、修改密码、退出登录
+- `/login`：登录
+- `/register`：注册
+- `/dashboard`：工作台，含数据统计和快速体验入口
+- `/create`：智能创作，支持生成、重新生成、保存、一键复制
+- `/history`：历史记录，支持搜索、筛选、排序、分页、详情、删除、批量删除
+- `/profile`：个人中心，支持用户信息、修改用户名、修改密码、退出登录
 
-## 部署建议
+## 生产部署建议
 
 1. 服务器安装 Node.js、MySQL、Nginx。
-2. 导入 `database/init.sql`。
-3. 在 `server/.env` 配置数据库、JWT、AI API。
-4. 后端执行 `npm install && npm start`，生产环境建议使用 PM2：
+2. 执行数据库初始化。
+3. 配置 `server/.env`，生产环境设置强随机 `JWT_SECRET`。
+4. 后端建议使用 PM2：
 
 ```bash
-npm install -g pm2
 cd server
+npm install
 pm2 start app.js --name aigc-short-video-server
 ```
 
-5. 前端执行构建：
+5. 前端构建：
 
 ```bash
 cd client
@@ -242,32 +245,31 @@ npm install
 npm run build
 ```
 
-6. 将 `client/dist` 交给 Nginx 托管，并把 `/api` 反向代理到后端端口。
+6. 使用 Nginx 托管 `client/dist`，并将 `/api` 反向代理到后端服务。
+
+## 线上化注意事项
+
+- 配置 HTTPS
+- 限制 CORS 白名单
+- 生产环境使用更严格的日志策略
+- AI API 增加超时、重试、额度和错误监控
+- 重要操作增加审计日志
+- 数据库定期备份
+- 前端可继续做路由级代码分割以优化首屏体积
 
 ## 常见问题
 
-- 页面提示无法访问 `localhost:5173`：前端开发服务器没有启动，进入 `client` 执行 `npm run dev`。
-- 注册提示服务器错误：通常是 MySQL 未启动、`.env` 数据库密码不对，或未执行 `database/init.sql`。
-- 登录后生成提示 401：token 过期或本地登录状态失效，重新登录即可。
-- AI 模式无结果：检查 `AI_API_KEY` 是否配置，或先切换 `GENERATION_MODE=template` 兜底演示。
-- 换电脑运行：需要重新执行 `npm install`，因为 `node_modules` 不建议提交到 GitHub。
+- 页面无法访问 `localhost:5173`：前端开发服务器未启动。
+- 注册提示数据库不存在：执行 `cd server && npm run db:init`。
+- 登录后请求返回 401：token 过期或登录状态失效，重新登录。
+- AI 模式无结果：检查 `AI_API_KEY`，也可以临时切换 `GENERATION_MODE=template` 使用稳定降级。
+- 换电脑运行：需要重新执行 `npm install`，`node_modules` 不提交到 GitHub。
 
-## 课程展示建议
+## 后续规划
 
-推荐演示顺序：
-
-1. 注册或登录账号。
-2. 打开工作台，展示统计卡片和系统简介。
-3. 点击“课程演示”，自动填充示例并生成内容。
-4. 展示标题、口播、分镜、标签和发布建议。
-5. 点击保存，进入历史记录查看详情。
-6. 演示搜索、筛选、分页、删除。
-7. 打开个人中心，展示用户信息、系统版本和开发信息。
-
-## 后续可扩展方向
-
-- 支持导出 TXT、JSON、Word 文件
-- 支持更多 AI Provider，例如 OpenAI、通义千问、智谱
+- 支持 TXT、JSON、Word、PDF 导出
+- 支持团队空间和多人协作
 - 支持封面图生成
-- 支持短视频脚本评分
-- 支持管理员后台和作品审核
+- 支持内容评分和平台适配度分析
+- 支持作品状态流转和审核
+- 支持更多大模型 Provider

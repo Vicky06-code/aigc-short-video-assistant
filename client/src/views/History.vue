@@ -2,64 +2,59 @@
   <section class="panel-card">
     <div class="history-toolbar">
       <div class="section-title">
-        <h2>历史记录</h2>
-        <p>所有保存过的创作方案都会持久化到 MySQL，刷新页面后仍可查看。</p>
+        <h2>{{ t('historyTitle') }}</h2>
+        <p>{{ t('historyIntro') }}</p>
       </div>
       <div class="history-actions">
-        <el-button type="primary" @click="$router.push('/create')">新建创作</el-button>
-        <el-button type="danger" plain :disabled="records.length === 0" @click="clearAll">清空全部</el-button>
+        <el-button type="primary" @click="$router.push('/create')">{{ t('newCreate') }}</el-button>
+        <el-button type="danger" plain :disabled="records.length === 0" @click="clearAll">{{ t('clearAll') }}</el-button>
       </div>
     </div>
 
     <div class="history-filters">
-      <el-input v-model="filters.keyword" placeholder="搜索主题" clearable />
-      <el-select v-model="filters.platform" placeholder="平台筛选" clearable>
+      <el-input v-model="filters.keyword" :placeholder="t('searchTopic')" clearable />
+      <el-select v-model="filters.platform" :placeholder="t('filterPlatform')" clearable>
         <el-option v-for="item in platforms" :key="item" :label="item" :value="item" />
       </el-select>
-      <el-select v-model="filters.style" placeholder="风格筛选" clearable>
+      <el-select v-model="filters.style" :placeholder="t('filterStyle')" clearable>
         <el-option v-for="item in styles" :key="item" :label="item" :value="item" />
       </el-select>
-      <el-select v-model="filters.order" placeholder="时间排序">
-        <el-option label="最新优先" value="desc" />
-        <el-option label="最早优先" value="asc" />
+      <el-select v-model="filters.order" :placeholder="t('sortTime')">
+        <el-option :label="t('newest')" value="desc" />
+        <el-option :label="t('oldest')" value="asc" />
       </el-select>
     </div>
 
     <div class="batch-bar">
-      <span class="muted">已选择 {{ selectedRows.length }} 条，共 {{ filteredRecords.length }} 条匹配记录</span>
-      <el-button type="danger" plain :disabled="selectedRows.length === 0" @click="removeBatch">批量删除</el-button>
+      <span class="muted">{{ t('selectedRows', { count: selectedRows.length, total: filteredRecords.length }) }}</span>
+      <el-button type="danger" plain :disabled="selectedRows.length === 0" @click="removeBatch">{{ t('batchDelete') }}</el-button>
     </div>
 
-    <el-table
-      :data="pagedRecords"
-      v-loading="loading"
-      border
-      @selection-change="selectedRows = $event"
-    >
+    <el-table :data="pagedRecords" v-loading="loading" border @selection-change="selectedRows = $event">
       <el-table-column type="selection" width="48" />
-      <el-table-column prop="topic" label="主题" min-width="220" show-overflow-tooltip />
-      <el-table-column prop="platform" label="平台" width="110" />
-      <el-table-column prop="style" label="风格" width="130" />
-      <el-table-column prop="duration" label="时长" width="100">
-        <template #default="{ row }">{{ row.duration }} 秒</template>
+      <el-table-column prop="topic" :label="t('tableTopic')" min-width="220" show-overflow-tooltip />
+      <el-table-column prop="platform" :label="t('platform')" width="110" />
+      <el-table-column prop="style" :label="t('style')" width="130" />
+      <el-table-column prop="duration" :label="t('duration')" width="100">
+        <template #default="{ row }">{{ row.duration }}s</template>
       </el-table-column>
-      <el-table-column prop="generationMode" label="模式" width="130">
+      <el-table-column prop="generationMode" :label="t('mode')" width="130">
         <template #default="{ row }">
           <el-tag :type="modeTag(row.generationMode)" size="small">{{ modeText(row.generationMode) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="created_at" label="创建时间" min-width="180">
+      <el-table-column prop="created_at" :label="t('createdAt')" min-width="180">
         <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="150" fixed="right">
+      <el-table-column :label="t('actions')" width="150" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" @click="viewDetail(row)">查看</el-button>
-          <el-button link type="danger" @click="remove(row)">删除</el-button>
+          <el-button link type="primary" @click="viewDetail(row)">{{ t('view') }}</el-button>
+          <el-button link type="danger" @click="remove(row)">{{ t('delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-empty v-if="!loading && filteredRecords.length === 0" description="暂无匹配的历史记录" />
+    <el-empty v-if="!loading && filteredRecords.length === 0" :description="t('emptyHistory')" />
 
     <div v-if="filteredRecords.length > 0" class="pagination-bar">
       <el-pagination
@@ -71,44 +66,47 @@
       />
     </div>
 
-    <el-drawer v-model="drawerVisible" size="58%" title="创作方案详情">
+    <el-drawer v-model="drawerVisible" size="58%" :title="t('detailTitle')">
       <div v-loading="detailLoading">
         <template v-if="detail">
-          <ResultCard title="基础信息">
+          <ResultCard :title="t('basicInfo')">
             <el-descriptions :column="2" border>
-              <el-descriptions-item label="主题">{{ detail.topic }}</el-descriptions-item>
-              <el-descriptions-item label="平台">{{ detail.platform }}</el-descriptions-item>
-              <el-descriptions-item label="风格">{{ detail.style }}</el-descriptions-item>
-              <el-descriptions-item label="时长">{{ detail.duration }} 秒</el-descriptions-item>
-              <el-descriptions-item label="目标受众">{{ detail.audience }}</el-descriptions-item>
-              <el-descriptions-item label="创建时间">{{ formatTime(detail.created_at) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('topic')">{{ detail.topic }}</el-descriptions-item>
+              <el-descriptions-item :label="t('platform')">{{ detail.platform }}</el-descriptions-item>
+              <el-descriptions-item :label="t('style')">{{ detail.style }}</el-descriptions-item>
+              <el-descriptions-item :label="t('duration')">{{ detail.duration }}s</el-descriptions-item>
+              <el-descriptions-item :label="t('audience')">{{ detail.audience }}</el-descriptions-item>
+              <el-descriptions-item :label="t('createdAt')">{{ formatTime(detail.created_at) }}</el-descriptions-item>
+              <el-descriptions-item v-if="detail.creativeRequirement" :label="t('creativeRequirement')" :span="2">
+                {{ detail.creativeRequirement }}
+              </el-descriptions-item>
             </el-descriptions>
           </ResultCard>
 
-          <ResultCard title="标题">
+          <ResultCard :title="t('titleRecommend')">
             <ol class="title-list">
               <li v-for="title in detail.titles" :key="title">{{ title }}</li>
             </ol>
           </ResultCard>
 
-          <ResultCard title="口播文案">
+          <ResultCard :title="t('speechScript')">
             <p class="script">{{ detail.speechScript }}</p>
           </ResultCard>
 
-          <ResultCard title="分镜脚本">
+          <ResultCard :title="t('storyboard')">
             <StoryboardTable :items="detail.storyboard" />
           </ResultCard>
 
-          <ResultCard title="标签">
+          <ResultCard :title="t('tags')">
             <TagList :tags="detail.tags" />
           </ResultCard>
 
-          <ResultCard title="发布建议">
+          <ResultCard :title="t('publishAdvice')">
             <el-descriptions :column="1" border>
-              <el-descriptions-item label="推荐发布时间">{{ detail.publishAdvice.bestTime }}</el-descriptions-item>
-              <el-descriptions-item label="封面文案">{{ detail.publishAdvice.coverText }}</el-descriptions-item>
-              <el-descriptions-item label="互动引导语">{{ detail.publishAdvice.interactionGuide }}</el-descriptions-item>
-              <el-descriptions-item label="平台发布建议">{{ detail.publishAdvice.platformAdvice }}</el-descriptions-item>
+              <el-descriptions-item :label="t('bestTime')">{{ detail.publishAdvice.bestTime }}</el-descriptions-item>
+              <el-descriptions-item :label="t('coverText')">{{ detail.publishAdvice.coverText }}</el-descriptions-item>
+              <el-descriptions-item :label="t('interactionGuide')">{{ detail.publishAdvice.interactionGuide }}</el-descriptions-item>
+              <el-descriptions-item :label="t('platformAdvice')">{{ detail.publishAdvice.platformAdvice }}</el-descriptions-item>
             </el-descriptions>
           </ResultCard>
         </template>
@@ -123,11 +121,12 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import ResultCard from '../components/ResultCard.vue';
 import StoryboardTable from '../components/StoryboardTable.vue';
 import TagList from '../components/TagList.vue';
+import { useI18n } from '../i18n';
 import request from '../utils/request';
 
+const { t } = useI18n();
 const platforms = ['抖音', '小红书', 'B站', '视频号'];
-const styles = ['知识科普', '生活分享', '产品种草', '剧情口播'];
-
+const styles = ['知识科普', '生活分享', '产品种草', '剧情口播', '热点解读', '教程教学', '测评体验', '职场干货', '情感共鸣', '搞笑娱乐'];
 const loading = ref(false);
 const detailLoading = ref(false);
 const drawerVisible = ref(false);
@@ -175,9 +174,9 @@ function formatTime(value) {
 }
 
 function modeText(mode) {
-  if (mode === 'ai') return 'AI';
-  if (mode === 'fallback_template') return '兜底模板';
-  return '模板';
+  if (mode === 'ai') return t('aiMode');
+  if (mode === 'fallback_template') return t('fallbackMode');
+  return t('templateMode');
 }
 
 function modeTag(mode) {
@@ -214,10 +213,10 @@ async function viewDetail(row) {
 }
 
 async function remove(row) {
-  await ElMessageBox.confirm(`确认删除“${row.topic}”吗？`, '删除确认', { type: 'warning' });
+  await ElMessageBox.confirm(`${t('delete')} "${row.topic}"?`, t('delete'), { type: 'warning' });
   try {
     await request.delete(`/creation/${row.id}`);
-    ElMessage.success('删除成功');
+    ElMessage.success(t('delete'));
     await loadRecords();
   } catch (error) {
     ElMessage.error(error.message);
@@ -225,10 +224,10 @@ async function remove(row) {
 }
 
 async function removeBatch() {
-  await ElMessageBox.confirm(`确认删除选中的 ${selectedRows.value.length} 条记录吗？`, '批量删除确认', { type: 'warning' });
+  await ElMessageBox.confirm(`${t('batchDelete')} ${selectedRows.value.length}?`, t('batchDelete'), { type: 'warning' });
   try {
     await request.delete('/creation/batch', { data: { ids: selectedRows.value.map((item) => item.id) } });
-    ElMessage.success('批量删除成功');
+    ElMessage.success(t('batchDelete'));
     await loadRecords();
   } catch (error) {
     ElMessage.error(error.message);
@@ -236,10 +235,10 @@ async function removeBatch() {
 }
 
 async function clearAll() {
-  await ElMessageBox.confirm('确认清空当前账号的全部历史记录吗？此操作不可恢复。', '清空确认', { type: 'warning' });
+  await ElMessageBox.confirm(t('clearAll'), t('clearAll'), { type: 'warning' });
   try {
     await request.delete('/creation/all');
-    ElMessage.success('已清空全部历史记录');
+    ElMessage.success(t('clearAll'));
     await loadRecords();
   } catch (error) {
     ElMessage.error(error.message);
