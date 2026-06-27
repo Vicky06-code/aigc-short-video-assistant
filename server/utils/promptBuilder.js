@@ -53,13 +53,14 @@ JSON 结构必须是：
 5. speechScript 必须包含：开头 3 秒钩子、问题解释、核心观点、至少 1 个具体例子或建议、结尾互动引导。
 6. speechScript 要口语化、自然、有节奏，适合真人直接照着录制。
 7. speechScript 必须围绕“${topic}”本身展开，直接解释现象、原因、影响和行动建议，不要写成泛泛的内容运营方法论。
-8. 除非主题本身和运营、营销有关，否则不要使用“痛点、场景、转化、用户需求、平台适配、选题”等生硬术语。
-9. storyboard 必须生成 ${storyboardCount} 个镜头，并且必须是数组。
-10. 每个 storyboard 对象必须包含 sceneNo、timeRange、visual、voiceover、subtitle、camera。
-11. storyboard 的 voiceover 要从 speechScript 中按顺序拆分，不能过短，每个镜头都要有具体口播内容。
-12. tags 必须生成 8 到 10 个中文标签，标签要以 # 开头。
-13. publishAdvice 必须包含推荐发布时间、封面文案、互动引导语和平台发布建议。
-14. 内容必须适合 ${platform}，并符合 ${style} 的表达特点。
-15. 如果提供了自由创作要求，必须优先遵循；如果自由要求与基础风格冲突，以自由创作要求为准。
+8. 如果主题是网络热梗、互联网流行语、谐音梗、评论区用语或短句梗，不要按字面意思严肃解释；必须先说明它是一个梗，再解释真实语境、情绪含义、使用场景、使用边界，并给出自然例子。
+9. 除非主题本身和运营、营销有关，否则不要使用“痛点、场景、转化、用户需求、平台适配、选题”等生硬术语。
+10. storyboard 必须生成 ${storyboardCount} 个镜头，并且必须是数组。
+11. 每个 storyboard 对象必须包含 sceneNo、timeRange、visual、voiceover、subtitle、camera。
+12. storyboard 的 voiceover 要从 speechScript 中按顺序拆分，不能过短，每个镜头都要有具体口播内容。
+13. tags 必须生成 8 到 10 个中文标签，标签要以 # 开头。
+14. publishAdvice 必须包含推荐发布时间、封面文案、互动引导语和平台发布建议。
+15. 内容必须适合 ${platform}，并符合 ${style} 的表达特点。
+16. 如果提供了自由创作要求，必须优先遵循；如果自由要求与基础风格冲突，以自由创作要求为准。
 `.trim();
 }

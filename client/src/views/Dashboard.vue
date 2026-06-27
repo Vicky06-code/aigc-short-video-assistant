@@ -44,24 +44,45 @@
           <h2>{{ t('hotTopicsTitle') }}</h2>
           <p>{{ t('hotTopicsDesc') }}</p>
         </div>
-        <el-tag type="primary">{{ todayText }}</el-tag>
+        <div class="trend-source">
+          <el-tag type="primary">{{ todayText }}</el-tag>
+          <el-tag :type="hotTopicSource === 'baidu' ? 'success' : 'warning'">
+            {{ hotTopicSource === 'baidu' ? t('hotSourceRealtime') : t('hotSourceFallback') }}
+          </el-tag>
+        </div>
       </div>
 
-      <div class="trend-grid">
-        <article v-for="item in hotTopics" :key="item.topic" class="trend-card">
+      <div class="trend-platform-tabs">
+        <button
+          v-for="item in platformFilters"
+          :key="item.value"
+          class="trend-platform-tab"
+          :class="{ active: activeHotPlatform === item.value }"
+          type="button"
+          @click="activeHotPlatform = item.value"
+        >
+          <span>{{ item.label }}</span>
+          <strong>{{ item.count }}</strong>
+        </button>
+      </div>
+
+      <div class="trend-grid" v-loading="hotLoading">
+        <article v-for="item in filteredHotTopics" :key="`${item.platform}-${item.topic}`" class="trend-card">
           <div class="trend-card-header">
-            <el-tag :type="item.tagType">{{ item.platformLabel }}</el-tag>
+            <el-tag :type="item.tagType">{{ getPlatformLabel(item.platform) }}</el-tag>
             <span>{{ t('trendHeat') }} {{ item.heat }}</span>
           </div>
           <h3>{{ item.topic }}</h3>
           <p>{{ item.reason }}</p>
           <div class="trend-meta">
-            <span>{{ t('trendStyle') }}：{{ item.styleLabel }}</span>
+            <span>{{ t('trendStyle') }}：{{ getStyleLabel(item.style) }}</span>
             <span>{{ t('trendAudience') }}：{{ item.audience }}</span>
           </div>
           <el-button type="primary" plain @click="useTopic(item)">{{ t('trendUse') }}</el-button>
         </article>
       </div>
+
+      <el-empty v-if="!hotLoading && filteredHotTopics.length === 0" :description="t('emptyPlatformTopics')" />
     </section>
 
     <section class="feature-grid">
@@ -90,6 +111,69 @@ import request from '../utils/request';
 const router = useRouter();
 const { t, locale } = useI18n();
 const loading = ref(false);
+const hotLoading = ref(false);
+const hotTopics = ref([]);
+const hotTopicSource = ref('fallback');
+const activeHotPlatform = ref('all');
+
+const platformValues = ['抖音', '小红书', 'B站', '视频号'];
+const platformLabelMap = {
+  'zh-CN': ['抖音', '小红书', 'B站', '视频号'],
+  'zh-TW': ['抖音', '小紅書', 'B站', '視頻號'],
+  en: ['Douyin', 'Xiaohongshu', 'Bilibili', 'WeChat Channels'],
+  de: ['Douyin', 'Xiaohongshu', 'Bilibili', 'WeChat Channels']
+};
+
+const styleLabelMap = {
+  'zh-CN': {
+    知识科普: '知识科普',
+    生活分享: '生活分享',
+    产品种草: '产品种草',
+    剧情口播: '剧情口播',
+    热点解读: '热点解读',
+    教程教学: '教程教学',
+    测评体验: '测评体验',
+    职场干货: '职场干货',
+    情感共鸣: '情感共鸣',
+    搞笑娱乐: '搞笑娱乐'
+  },
+  'zh-TW': {
+    知识科普: '知識科普',
+    生活分享: '生活分享',
+    产品种草: '產品種草',
+    剧情口播: '劇情口播',
+    热点解读: '熱點解讀',
+    教程教学: '教程教學',
+    测评体验: '測評體驗',
+    职场干货: '職場乾貨',
+    情感共鸣: '情感共鳴',
+    搞笑娱乐: '搞笑娛樂'
+  },
+  en: {
+    知识科普: 'Knowledge',
+    生活分享: 'Lifestyle',
+    产品种草: 'Product',
+    剧情口播: 'Storytelling',
+    热点解读: 'Trend Analysis',
+    教程教学: 'Tutorial',
+    测评体验: 'Review',
+    职场干货: 'Career Tips',
+    情感共鸣: 'Emotional',
+    搞笑娱乐: 'Comedy'
+  },
+  de: {
+    知识科普: 'Wissen',
+    生活分享: 'Lifestyle',
+    产品种草: 'Produkt',
+    剧情口播: 'Storytelling',
+    热点解读: 'Trend-Analyse',
+    教程教学: 'Tutorial',
+    测评体验: 'Review',
+    职场干货: 'Karriere',
+    情感共鸣: 'Emotional',
+    搞笑娱乐: 'Comedy'
+  }
+};
 
 const stats = reactive({
   total: 0,
@@ -105,151 +189,41 @@ const features = [
   { titleKey: 'featureAigc', descriptionKey: 'featureAigcDesc', path: '/profile' }
 ];
 
-const topicPresets = {
-  'zh-CN': [
-    {
-      topic: 'AI 工具如何提升内容团队效率',
-      reason: 'AI 提效仍是企业内容生产的高关注方向，适合做工具清单、流程拆解和案例对比。',
-      platform: '抖音',
-      platformLabel: '抖音',
-      style: '知识科普',
-      styleLabel: '知识科普',
-      audience: '内容运营团队',
-      heat: '96',
-      tagType: 'danger'
-    },
-    {
-      topic: '新消费品牌如何做好短视频转化',
-      reason: '品牌增长和种草转化是长期热门需求，适合输出方法论和落地步骤。',
-      platform: '小红书',
-      platformLabel: '小红书',
-      style: '产品种草',
-      styleLabel: '产品种草',
-      audience: '品牌营销人员',
-      heat: '92',
-      tagType: 'success'
-    },
-    {
-      topic: '普通人如何搭建个人内容 IP',
-      reason: '个人品牌、职场成长和副业内容持续受关注，适合做系列化选题。',
-      platform: 'B站',
-      platformLabel: 'B站',
-      style: '生活分享',
-      styleLabel: '生活分享',
-      audience: '内容创作者',
-      heat: '89',
-      tagType: 'warning'
-    }
-  ],
-  'zh-TW': [
-    {
-      topic: 'AI 工具如何提升內容團隊效率',
-      reason: 'AI 提效仍是企業內容生產的高關注方向，適合做工具清單、流程拆解和案例對比。',
-      platform: '抖音',
-      platformLabel: '抖音',
-      style: '知识科普',
-      styleLabel: '知識科普',
-      audience: '內容營運團隊',
-      heat: '96',
-      tagType: 'danger'
-    },
-    {
-      topic: '新消費品牌如何做好短影片轉化',
-      reason: '品牌增長和種草轉化是長期熱門需求，適合輸出方法論和落地步驟。',
-      platform: '小红书',
-      platformLabel: '小紅書',
-      style: '产品种草',
-      styleLabel: '產品種草',
-      audience: '品牌行銷人員',
-      heat: '92',
-      tagType: 'success'
-    },
-    {
-      topic: '普通人如何搭建個人內容 IP',
-      reason: '個人品牌、職場成長和副業內容持續受關注，適合做系列化選題。',
-      platform: 'B站',
-      platformLabel: 'B站',
-      style: '生活分享',
-      styleLabel: '生活分享',
-      audience: '內容創作者',
-      heat: '89',
-      tagType: 'warning'
-    }
-  ],
-  en: [
-    {
-      topic: 'How AI tools improve content team efficiency',
-      reason: 'AI productivity is a strong topic for teams, tool lists, workflow breakdowns, and case comparisons.',
-      platform: '抖音',
-      platformLabel: 'Douyin',
-      style: '知识科普',
-      styleLabel: 'Knowledge',
-      audience: 'content operations teams',
-      heat: '96',
-      tagType: 'danger'
-    },
-    {
-      topic: 'How new consumer brands improve short-video conversion',
-      reason: 'Brand growth and conversion remain high-demand topics for practical playbooks and step-by-step content.',
-      platform: '小红书',
-      platformLabel: 'Xiaohongshu',
-      style: '产品种草',
-      styleLabel: 'Product Seeding',
-      audience: 'brand marketers',
-      heat: '92',
-      tagType: 'success'
-    },
-    {
-      topic: 'How creators build a personal content IP',
-      reason: 'Personal branding and creator growth work well for serial content and long-term audience building.',
-      platform: 'B站',
-      platformLabel: 'Bilibili',
-      style: '生活分享',
-      styleLabel: 'Lifestyle',
-      audience: 'content creators',
-      heat: '89',
-      tagType: 'warning'
-    }
-  ],
-  de: [
-    {
-      topic: 'Wie AI-Tools Content-Teams effizienter machen',
-      reason: 'AI-Produktivität ist ein starkes Thema für Teams, Tool-Listen, Workflows und Fallvergleiche.',
-      platform: '抖音',
-      platformLabel: 'Douyin',
-      style: '知识科普',
-      styleLabel: 'Wissen',
-      audience: 'Content-Operations-Teams',
-      heat: '96',
-      tagType: 'danger'
-    },
-    {
-      topic: 'Wie neue Marken Kurzvideo-Conversions steigern',
-      reason: 'Markenwachstum und Conversion bleiben zentrale Themen für praktische Playbooks.',
-      platform: '小红书',
-      platformLabel: 'Xiaohongshu',
-      style: '产品种草',
-      styleLabel: 'Produkt-Empfehlung',
-      audience: 'Brand-Marketer',
-      heat: '92',
-      tagType: 'success'
-    },
-    {
-      topic: 'Wie Creator eine persönliche Content-IP aufbauen',
-      reason: 'Personal Branding und Creator-Wachstum eignen sich gut für Serienformate.',
-      platform: 'B站',
-      platformLabel: 'Bilibili',
-      style: '生活分享',
-      styleLabel: 'Lifestyle',
-      audience: 'Content-Creator',
-      heat: '89',
-      tagType: 'warning'
-    }
-  ]
-};
-
-const hotTopics = computed(() => topicPresets[locale.value] || topicPresets['zh-CN']);
 const todayText = computed(() => new Date().toLocaleDateString(locale.value));
+
+const platformFilters = computed(() => {
+  const items = [
+    {
+      value: 'all',
+      label: t('allPlatforms'),
+      count: hotTopics.value.length
+    }
+  ];
+
+  platformValues.forEach((platform, index) => {
+    items.push({
+      value: platform,
+      label: platformLabelMap[locale.value]?.[index] || platform,
+      count: hotTopics.value.filter((topic) => topic.platform === platform).length
+    });
+  });
+
+  return items;
+});
+
+const filteredHotTopics = computed(() => {
+  if (activeHotPlatform.value === 'all') return hotTopics.value;
+  return hotTopics.value.filter((item) => item.platform === activeHotPlatform.value);
+});
+
+function getPlatformLabel(platform) {
+  const index = platformValues.indexOf(platform);
+  return platformLabelMap[locale.value]?.[index] || platform;
+}
+
+function getStyleLabel(style) {
+  return styleLabelMap[locale.value]?.[style] || style;
+}
 
 function formatTime(value) {
   if (!value) return '-';
@@ -272,9 +246,25 @@ function useTopic(item) {
       platform: item.platform,
       style: item.style,
       duration: 30,
-      audience: item.audience
+      audience: item.audience,
+      creativeRequirement: item.creativeRequirement || ''
     }
   });
+}
+
+async function loadHotTopics() {
+  hotLoading.value = true;
+  try {
+    const res = await request.get('/hot-topics');
+    hotTopics.value = res.data?.topics || [];
+    hotTopicSource.value = res.data?.source || 'fallback';
+  } catch (error) {
+    hotTopics.value = [];
+    hotTopicSource.value = 'fallback';
+    ElMessage.warning(error.message);
+  } finally {
+    hotLoading.value = false;
+  }
 }
 
 async function loadStats() {
@@ -293,5 +283,8 @@ async function loadStats() {
   }
 }
 
-onMounted(loadStats);
+onMounted(() => {
+  loadStats();
+  loadHotTopics();
+});
 </script>

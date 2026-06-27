@@ -45,7 +45,224 @@ const styleToneMap = {
   搞笑娱乐: '节奏轻松，允许夸张和反差，但结尾仍要回到主题本身'
 };
 
+const hookLibrary = {
+  知识科普: [
+    '你以为这只是一个普通现象，但背后其实有一套很清晰的逻辑。',
+    '先别急着下判断，这个问题如果拆开看，会发现关键点并不复杂。',
+    '很多人只看到了结果，但真正值得讲的是它为什么会发生。'
+  ],
+  生活分享: [
+    '这件事我一开始也没太在意，后来发现它真的会影响日常选择。',
+    '如果你也遇到过类似情况，这条内容应该会很有共鸣。',
+    '今天不讲大道理，就用一个真实场景把这件事说清楚。'
+  ],
+  产品种草: [
+    '如果你正在纠结要不要入手，先别急着下单。',
+    '这类东西到底值不值得买，关键不是看参数，而是看适不适合你。',
+    '我会直接讲优点、缺点和适合人群，帮你少走一点弯路。'
+  ],
+  剧情口播: [
+    '如果这件事发生在你身上，你第一反应可能也会和我一样。',
+    '故事要从一个看起来很普通的决定说起，但后面的反转才是重点。',
+    '一开始所有人都觉得没问题，直到真正的变化出现。'
+  ],
+  热点解读: [
+    '这个话题最近突然被很多人讨论，但真正值得关注的不是热度本身。',
+    '别只看标题，这个热点背后至少有三个信号。',
+    '如果你只知道它火了，那还不够，关键是要知道它为什么火。'
+  ],
+  教程教学: [
+    '这件事其实可以按步骤做，不需要一上来就追求完美。',
+    '我把方法拆成几个动作，你照着做就能先跑起来。',
+    '别被复杂教程吓到，先掌握最关键的流程就够了。'
+  ],
+  测评体验: [
+    '我会从真实使用角度讲，不只说好听的，也会说它的问题。',
+    '这次不看宣传话术，只看实际体验到底怎么样。',
+    '如果你正在犹豫，我会用几个具体场景帮你判断。'
+  ],
+  职场干货: [
+    '职场里很多问题不是能力不够，而是判断顺序错了。',
+    '这条内容适合想提高效率、少踩坑的人认真听完。',
+    '我直接讲可执行的方法，不绕概念。'
+  ],
+  情感共鸣: [
+    '有些问题看起来很小，但真的会让人反复消耗。',
+    '如果你最近也有这种感觉，先别急着否定自己。',
+    '这不是矫情，而是很多人都会经历的一种状态。'
+  ],
+  搞笑娱乐: [
+    '这件事说严肃也严肃，说离谱也是真的离谱。',
+    '先声明，我不是在夸张，但这个画面感真的很强。',
+    '如果把这件事拍成短视频，开头三秒就已经有戏了。'
+  ]
+};
+
+const explanationLibrary = [
+  '它背后通常有三个层面的原因：外部环境变化、用户选择变化，以及信息传播速度变快。',
+  '判断这类问题时，不要只看单个事件，而要看它是否正在形成连续影响。',
+  '真正影响结果的不是某一个单点，而是多个因素叠加后，让原本的小变化变得明显。',
+  '你可以把它理解成一个信号：当越来越多人开始讨论，说明它已经影响到具体决策。'
+];
+
+const actionLibrary = [
+  '第一步，先确认它和你有没有直接关系；第二步，判断现在是否必须行动；第三步，再决定投入多少时间或成本。',
+  '更稳妥的做法是先收集信息，再做小范围尝试，最后根据反馈调整。',
+  '如果你现在还不确定，先不要被情绪推着走，可以给自己设一个观察周期，再做决定。',
+  '建议你先把目标拆小，用一个能马上执行的动作开始，而不是停留在焦虑里。'
+];
+
+const endingLibrary = [
+  '如果这条内容对你有帮助，可以先收藏，下次遇到类似问题时直接对照看。',
+  '你也可以在评论区告诉我，你更想听原因拆解，还是具体操作方法。',
+  '如果你想继续看这类内容，关注我，下一条继续把复杂问题讲简单。',
+  '最后别忘了，真正有用的内容不是制造焦虑，而是帮你做出更清楚的判断。'
+];
+
+const visualLibrary = {
+  default: [
+    '大字标题抛出核心问题，背景用主题相关素材',
+    '展示目标受众常见困惑，叠加关键词字幕',
+    '用三栏卡片呈现原因、影响、建议',
+    '切换到具体案例画面，突出前后对比',
+    '用清单画面总结关键步骤',
+    '展示评论区提问或收藏动作，引导互动',
+    '正面口播收尾，屏幕保留核心结论'
+  ],
+  测评体验: [
+    '开箱或使用场景特写，快速给出第一感受',
+    '展示真实使用过程，标出优点和槽点',
+    '用对比镜头呈现不同选择的差异',
+    '切到细节特写，说明适合和不适合的人',
+    '用评分卡或清单总结体验结论',
+    '展示购买或避坑建议',
+    '口播收尾，提醒按需求选择'
+  ],
+  教程教学: [
+    '标题页展示本期要完成的目标',
+    '屏幕录制或桌面俯拍展示第一步',
+    '用箭头和编号标出关键操作',
+    '演示常见错误和正确做法',
+    '快速回放完整流程',
+    '列出注意事项和检查清单',
+    '结尾展示完成效果和下一步建议'
+  ],
+  情感共鸣: [
+    '生活化场景开头，营造真实情绪',
+    '人物近景口播，表达内心状态',
+    '切换到细节画面，比如手机、桌面、夜晚灯光',
+    '用字幕强调一句共鸣观点',
+    '展示情绪转折或自我调整动作',
+    '给出温和建议，不说教',
+    '安静收尾，留下互动问题'
+  ],
+  搞笑娱乐: [
+    '夸张表情或反差画面开场',
+    '用大字吐槽点明冲突',
+    '快切几个典型场景制造节奏',
+    '加入反转画面或停顿梗',
+    '用对比字幕强化笑点',
+    '回到主题给出轻松总结',
+    '用评论梗引导互动'
+  ]
+};
+
+const cameraLibrary = [
+  '近景口播，开头快速推进',
+  '中景实拍，搭配屏幕字幕',
+  '俯拍桌面或屏幕录制',
+  '快切 B-roll，节奏略快',
+  '分屏对比，突出反差',
+  '稳定中近景，语速放缓',
+  '正面口播，眼神看镜头'
+];
+
+function randomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function pickRandom(list) {
+  return list[randomInt(list.length)];
+}
+
+function shuffle(list) {
+  return [...list].sort(() => Math.random() - 0.5);
+}
+
+function takeRandom(list, count) {
+  return shuffle(list).slice(0, count);
+}
+
+const memeTopicLibrary = [
+  {
+    pattern: /爱你老几|爱你几|你老几/,
+    category: '网络热梗',
+    meaning: '它不是在认真讨论“爱谁”或者“排第几”，而是一种带点调侃和反问的网络表达，常用来表达“不必太在意别人评价”或者“先把自己放在前面”。',
+    context: '这个梗的传播点在于语气有反差：表面像一句没头没尾的话，实际是在用玩笑感表达边界感、自我态度和情绪释放。',
+    example: '比如有人过度评价你的选择，你就可以用这个梗表达：我不需要所有人都认可，我先把自己的感受和判断放在重要位置。',
+    caution: '但它更适合朋友间调侃、评论区互动或轻松内容，不适合正式沟通，也不要用来攻击具体的人。',
+    titleIdeas: [
+      '“爱你老几”到底是什么梗？一句话讲清楚',
+      '别再把“爱你老几”理解错了，它其实在表达这件事',
+      '为什么年轻人爱说“爱你老几”？背后是情绪和边界感',
+      '“爱你老几”爆火：好笑之外，也有一点真实',
+      '刷到“爱你老几”别懵，这个热梗是这么用的'
+    ],
+    tags: ['#爱你老几', '#网络热梗', '#热梗解读', '#互联网语境', '#年轻人表达', '#情绪价值']
+  },
+  {
+    pattern: /尊嘟假嘟|真的假的|真的假的啊/,
+    category: '网络热梗',
+    meaning: '这是把“真的假的”用更可爱、更夸张的方式说出来，核心不是求证事实，而是表达惊讶、怀疑和情绪反应。',
+    context: '它适合用在反转信息、离谱新闻、朋友聊天和评论区互动里，重点是语气轻松。',
+    example: '比如看到一个很意外的消息，直接说“尊嘟假嘟”，比普通的“真的假的”更有网感。',
+    caution: '正式科普时可以解释它的语境，但不要整段都堆梗，否则会显得刻意。',
+    titleIdeas: [
+      '“尊嘟假嘟”为什么突然火了？',
+      '一个词讲清楚“尊嘟假嘟”的真实语境',
+      '别只会跟风用，“尊嘟假嘟”其实是这种情绪',
+      '年轻人为什么爱说“尊嘟假嘟”？',
+      '“尊嘟假嘟”怎么用才不尴尬？'
+    ],
+    tags: ['#尊嘟假嘟', '#网络热梗', '#年轻人表达', '#评论区文化', '#热梗解读']
+  },
+  {
+    pattern: /遥遥领先|泼天富贵|显眼包|电子榨菜|搭子|松弛感|情绪价值/,
+    category: '网络流行语',
+    meaning: '这类词通常不是字面意思，而是在特定平台和社交语境里形成的高频表达。',
+    context: '它们能流行，是因为短、好记、能精准概括一种情绪或场景。',
+    example: '做这类内容时，重点不是查词典，而是解释它什么时候用、为什么大家愿意用、用错会不会尴尬。',
+    caution: '讲热梗要保持轻松，但也要给出使用边界，避免强行装年轻。',
+    titleIdeas: [
+      '这个热梗到底怎么火的？一次讲清楚',
+      '别再乱用了，这个网络流行语真正的语境是这样',
+      '为什么大家都在说这个词？背后有一个情绪入口',
+      '一个热梗能火，靠的不只是好笑',
+      '刷屏热梗怎么用才自然？看完就懂'
+    ],
+    tags: ['#网络流行语', '#热梗解读', '#互联网语境', '#内容灵感', '#年轻人表达']
+  }
+];
+
+function getMemeInsight(topic) {
+  return memeTopicLibrary.find((item) => item.pattern.test(topic));
+}
+
 function getTopicInsight(topic, audience) {
+  const meme = getMemeInsight(topic);
+  if (meme) {
+    return {
+      isMeme: true,
+      category: meme.category,
+      hook: `如果你最近刷到“${topic}”一脸懵，先别按字面意思理解，它更像是一个带情绪的${meme.category}。`,
+      reason: `${meme.meaning}${meme.context}`,
+      example: `${meme.example}对${audience}来说，真正值得讲的不是这个词有多好笑，而是它为什么能准确戳中当下的表达需求。`,
+      advice: `做这类内容时，可以按三个层次讲：第一，它表面是什么意思；第二，它在什么场景里用；第三，什么时候用会自然、什么时候会冒犯。${meme.caution}`,
+      titleIdeas: meme.titleIdeas,
+      tags: meme.tags
+    };
+  }
+
   if (/涨价|价格|变贵|降价|便宜|成本/.test(topic)) {
     return {
       hook: `最近你可能已经发现，${topic}不再只是新闻里的数字变化，而是会影响到真实购买决策。`,
@@ -110,17 +327,40 @@ export function validateCreationInput(input) {
 }
 
 export function generateTitles({ topic, platform, style, audience }) {
-  return [
-    `${topic}的 3 个关键判断，${audience}建议收藏`,
+  const meme = getMemeInsight(topic);
+  if (meme) {
+    return takeRandom(
+      [
+        ...meme.titleIdeas,
+        `${topic}为什么会刷屏？这不是字面意思那么简单`,
+        `${audience}也在用的${topic}，真正语境是什么？`,
+        `${style}版${topic}热梗解读，适合发在${platform}`,
+        `别尬用${topic}，先搞懂它的语气和边界`,
+        `${topic}火了：它到底戳中了什么情绪？`
+      ],
+      5
+    );
+  }
+
+  const audiencePrefix = topic.includes(audience) ? '' : `${audience}`;
+  const titleTemplates = [
+    `${topic}的 3 个关键判断，建议收藏`,
     `为什么大家都在关注${topic}？背后原因一次讲清楚`,
-    `${audience}必须了解的${topic}方法，看完就能用`,
+    `${audiencePrefix ? `${audiencePrefix}必须了解的` : ''}${topic}方法，看完就能用`,
     `${topic}实用指南：从问题到解决只差这几步`,
-    `适合${platform}发布的${style}选题：${topic}`
+    `${style}版${topic}，适合发在${platform}`,
+    `${topic}到底该怎么看？这几个细节很重要`,
+    `别再误解${topic}了，真正关键的是这一点`,
+    `关于${topic}，很多人忽略了这个信号`,
+    `${audiencePrefix ? `${audiencePrefix}看完就懂的` : ''}${topic}入门解释`,
+    `${topic}值不值得关注？先看这份判断清单`
   ];
+
+  return takeRandom(titleTemplates, 5);
 }
 
 export function selectTitle(titles) {
-  return titles[0];
+  return pickRandom(titles);
 }
 
 function paragraphJoin(parts) {
@@ -132,35 +372,78 @@ export function generateSpeechScript({ topic, platform, style, duration, audienc
   const platformTip = platformAdviceMap[platform].advice;
   const insight = getTopicInsight(topic, audience);
 
+  if (insight.isMeme) {
+    const memeEnding = `如果你还想看更多热梗拆解，可以先收藏这条，下次刷到类似表达就不会只停留在“好笑”这一层。`;
+    const shortScript = paragraphJoin([
+      insight.hook,
+      insight.reason,
+      `记住一个判断：热梗不是拿来逐字翻译的，要看它在评论区、聊天和短视频里的情绪语境。`,
+      memeEnding
+    ]);
+    const mediumScript = paragraphJoin([
+      insight.hook,
+      insight.reason,
+      insight.example,
+      insight.advice,
+      `如果发到${platform}，开头可以直接抛出“别按字面理解”，中间用一两个真实聊天场景解释，结尾再提醒使用边界，这样既有网感，也不会显得生硬。`,
+      memeEnding
+    ]);
+    const longScript = paragraphJoin([
+      insight.hook,
+      `讲这种梗，第一步一定不是查字典，而是还原它出现的场景。`,
+      insight.reason,
+      `第二步，看它解决了什么表达问题。很多人转发一个梗，不只是因为它好笑，而是因为它替自己说出了一种不好直接说出口的态度。`,
+      insight.example,
+      `第三步，看它有没有边界。熟人之间开玩笑可以，评论区轻松互动也可以，但如果拿它去怼陌生人、正式沟通或者攻击具体对象，就容易变味。`,
+      insight.advice,
+      `所以做成${style}内容时，重点不是复读热梗，而是讲清楚它为什么火、适合怎么用、什么时候别乱用。${tone}`,
+      `如果发到${platform}，建议前 3 秒直接用大字标题抛出“这个梗别按字面理解”，后面用聊天截图式画面和口播解释语境，收藏率会更高。${platformTip}`,
+      memeEnding
+    ]);
+
+    if (duration === 15) return shortScript;
+    if (duration === 30) return mediumScript;
+    return longScript;
+  }
+
+  const styleHooks = hookLibrary[style] || hookLibrary.知识科普;
+  const hook = `${pickRandom(styleHooks)}${insight.hook}`;
+  const explanation = pickRandom(explanationLibrary);
+  const action = pickRandom(actionLibrary);
+  const ending = pickRandom(endingLibrary);
+
   const shortScript = paragraphJoin([
-    `${insight.hook}`,
+    hook,
     `${insight.reason}`,
     `${insight.advice}`,
-    `如果你想继续看这类选题，先收藏，评论区告诉我你最关心哪一点。`
+    ending
   ]);
 
   const mediumScript = paragraphJoin([
-    `${insight.hook}`,
-    `很多人第一反应是紧张，或者马上问“现在要不要行动”，但越是这种时候，越要先把原因讲清楚。`,
+    hook,
+    explanation,
     `${insight.reason}`,
     `${insight.example}`,
     `${insight.advice}`,
+    action,
     `这类${style}内容发布到${platform}时，表达要更具体，少讲空泛判断，多给观众一个能马上参考的标准。${platformTip}`,
-    `如果你想继续看这类解释，可以先收藏，也可以在评论区告诉我你最想弄明白的点。`
+    ending
   ]);
 
   const longScript = paragraphJoin([
-    `${insight.hook}`,
+    hook,
     `我建议你先别只看一句结论，因为越是和钱、时间、选择有关的话题，越容易被情绪放大。`,
     `${insight.reason}`,
+    explanation,
     `先说第一个判断：它是不是短期波动。如果只是短期消息刺激，没必要立刻跟风；但如果上游供给、市场需求和库存都在变化，那影响就可能持续一段时间。`,
     `第二个判断：它和你有没有直接关系。${insight.example}`,
     `第三个判断：你有没有替代方案。如果不是马上必须买、必须做、必须选择，就可以把时间拉长一点，别在信息最吵的时候做决定。`,
     `${insight.advice}`,
+    action,
     `用${style}的方式讲这类内容，重点不是制造焦虑，而是把原因、影响和选择讲明白，${tone}。`,
     `如果发到${platform}，还要注意：${platformTip}`,
     `最后总结一句：遇到${topic}这种话题，先问三个问题：为什么发生，影响谁，我现在要不要行动。能回答这三个问题，你就不会只被标题牵着走。`,
-    `如果你觉得这条内容有用，可以先收藏起来，下次遇到类似变化时再对照看。评论区也可以告诉我，你还想让我拆解哪个具体问题。`
+    ending
   ]);
 
   if (duration === 15) return shortScript;
@@ -194,26 +477,9 @@ export function generateStoryboard({ topic, platform, style, duration, audience 
   const count = sceneCountByDuration(duration);
   const step = Math.ceil(duration / count);
   const scriptParts = splitScript(speechScript, count);
-
-  const visuals = [
-    `大字标题抛出“${topic}”的核心问题`,
-    `展示${audience}常见困惑或真实使用场景`,
-    '用列表、便签或屏幕录制呈现核心判断',
-    '切换到案例画面，展示错误做法和正确做法',
-    '用对比画面强调方法带来的变化',
-    '总结步骤，突出可执行动作',
-    '用评论问题和关注提示收尾'
-  ];
-
-  const cameras = [
-    '近景口播，开头快速推进',
-    '中景实拍，搭配屏幕字幕',
-    '俯拍桌面或屏幕录制',
-    '快切 B-roll，节奏略快',
-    '分屏对比，突出反差',
-    '稳定中近景，语速放缓',
-    '正面口播，眼神看镜头'
-  ];
+  const visuals = visualLibrary[style] || visualLibrary.default;
+  const visualPlan = takeRandom(visuals, count);
+  const cameraPlan = takeRandom(cameraLibrary, count);
 
   return Array.from({ length: count }, (_, index) => {
     const start = index * step;
@@ -223,15 +489,16 @@ export function generateStoryboard({ topic, platform, style, duration, audience 
     return {
       sceneNo: index + 1,
       timeRange: `${start}-${end}s`,
-      visual: visuals[index],
+      visual: `${visualPlan[index] || pickRandom(visuals)}，围绕“${topic}”展开`,
       voiceover,
       subtitle: voiceover.length > 28 ? `${voiceover.slice(0, 28)}...` : voiceover,
-      camera: `${cameras[index]}，适配${platform}${style}内容`
+      camera: `${cameraPlan[index] || pickRandom(cameraLibrary)}，适配${platform}${style}内容`
     };
   });
 }
 
 export function generateTags({ topic, platform, style, audience }) {
+  const meme = getMemeInsight(topic);
   const topicWords = topic
     .split(/[\s,，、。?!？！]+/)
     .filter(Boolean)
@@ -245,22 +512,57 @@ export function generateTags({ topic, platform, style, audience }) {
     `#${style}`,
     '#短视频创作',
     '#内容策划',
-    '#运营增长',
+    '#实用干货',
+    '#内容灵感',
     '#新媒体运营',
+    style === '热点解读' ? '#热点观察' : '',
+    style === '教程教学' ? '#教程分享' : '',
+    style === '测评体验' ? '#真实测评' : '',
+    style === '职场干货' ? '#职场成长' : '',
+    style === '情感共鸣' ? '#情绪价值' : '',
+    style === '搞笑娱乐' ? '#轻松一下' : '',
+    ...(meme?.tags || []),
     '#AIGC'
   ];
 
-  return [...new Set(tags)].slice(0, 10);
+  return [...new Set(tags.filter(Boolean))].slice(0, 10);
 }
 
 export function generatePublishAdvice({ topic, platform, style, audience }) {
   const platformInfo = platformAdviceMap[platform];
+  const audiencePrefix = topic.includes(audience) ? '' : `${audience}`;
+  const styleAdvice = {
+    知识科普: '封面突出“原因/方法/误区”，正文用小标题分层解释。',
+    生活分享: '封面更生活化，正文加入真实经历和前后变化。',
+    产品种草: '封面突出适用人群和核心卖点，正文注意说明缺点和边界。',
+    剧情口播: '封面制造冲突，前三秒先抛出悬念或反差。',
+    热点解读: '封面突出“发生了什么/意味着什么”，发布时间尽量贴近热点窗口。',
+    教程教学: '封面写清“几步完成”，正文用编号字幕提高收藏率。',
+    测评体验: '封面直接给结论，正文用优缺点和适用人群建立信任。',
+    职场干货: '封面强调具体收益，例如效率、沟通、避坑，结尾引导收藏。',
+    情感共鸣: '封面用一句情绪化表达，正文控制语气，避免过度鸡汤。',
+    搞笑娱乐: '封面突出反差或笑点，正文节奏要快，结尾用评论梗互动。'
+  };
+  const coverTexts = [
+    `${topic}：${audience}一定要看`,
+    `${topic}到底该怎么判断？`,
+    `关于${topic}，这几点很关键`,
+    `${audiencePrefix ? `${audiencePrefix}看懂` : ''}${topic}，先看这条`,
+    `${style}版${topic}，建议收藏`
+  ];
+  const interactionGuides = [
+    `你还想看哪个${style}选题？评论区告诉我，我继续拆给你。`,
+    `你对${topic}最关心哪一点？可以打在评论区。`,
+    `如果你想看更具体的案例，评论区留言“案例”。`,
+    `这条先收藏，下次做相关选题时可以直接参考。`,
+    `你觉得这个选题适合发在哪个平台？欢迎一起讨论。`
+  ];
 
   return {
     bestTime: platformInfo.bestTime,
-    coverText: `${topic}：${audience}一定要看`,
-    interactionGuide: `你还想看哪个${style}选题？评论区告诉我，我继续拆给你。`,
-    platformAdvice: platformInfo.advice
+    coverText: pickRandom(coverTexts),
+    interactionGuide: pickRandom(interactionGuides),
+    platformAdvice: `${platformInfo.advice}${styleAdvice[style] || ''}`
   };
 }
 

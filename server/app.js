@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import creationRoutes from './routes/creationRoutes.js';
+import hotTopicRoutes from './routes/hotTopicRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/creation', creationRoutes);
 app.use('/api/creations', creationRoutes);
+app.use('/api/hot-topics', hotTopicRoutes);
 
 app.use(errorHandler);
 

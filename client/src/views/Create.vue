@@ -97,6 +97,27 @@
           :title="fallbackNotice"
         />
 
+        <ResultCard :title="t('qualityReport')">
+          <div class="quality-report">
+            <div class="quality-score">
+              <el-progress type="dashboard" :percentage="qualityReport.score" :color="qualityColor" />
+              <strong>{{ qualityReport.level }}</strong>
+              <span>{{ t('qualityScoreDesc') }}</span>
+            </div>
+            <div class="quality-items">
+              <div v-for="item in qualityReport.items" :key="item.label" class="quality-item">
+                <div>
+                  <strong>{{ item.label }}</strong>
+                  <span>{{ item.hint }}</span>
+                </div>
+                <el-tag :type="item.passed ? 'success' : 'warning'">
+                  {{ item.passed ? t('qualityPassed') : t('qualityImprove') }}
+                </el-tag>
+              </div>
+            </div>
+          </div>
+        </ResultCard>
+
         <ResultCard :title="t('titleRecommend')">
           <template #extra>
             <el-tag type="primary">{{ t('selected') }}：{{ result.selectedTitle }}</el-tag>
@@ -214,6 +235,59 @@ const hasUnsavedResult = computed(() => Boolean(result.value) && !saved.value);
 
 const fallbackNotice = computed(() => {
   return fallbackReason.value ? `${t('modeFallbackText')}：${fallbackReason.value}` : t('modeFallbackText');
+});
+
+const qualityReport = computed(() => {
+  if (!result.value) {
+    return { score: 0, level: '-', items: [] };
+  }
+
+  const expectedScenes = { 15: 3, 30: 5, 60: 7 }[Number(form.duration)] || 5;
+  const minScriptLength = { 15: 45, 30: 90, 60: 160 }[Number(form.duration)] || 90;
+  const titleCount = result.value.titles?.length || 0;
+  const scriptLength = (result.value.speechScript || '').replace(/\s/g, '').length;
+  const storyboardCount = result.value.storyboard?.length || 0;
+  const tagCount = result.value.tags?.length || 0;
+  const advice = result.value.publishAdvice || {};
+
+  const items = [
+    {
+      label: t('qualityTitleCount'),
+      passed: titleCount >= 5 && Boolean(result.value.selectedTitle),
+      hint: t('qualityTitleHint', { count: titleCount })
+    },
+    {
+      label: t('qualityScriptLength'),
+      passed: scriptLength >= minScriptLength,
+      hint: t('qualityScriptHint', { count: scriptLength, target: minScriptLength })
+    },
+    {
+      label: t('qualityStoryboard'),
+      passed: storyboardCount >= expectedScenes,
+      hint: t('qualityStoryboardHint', { count: storyboardCount, expected: expectedScenes })
+    },
+    {
+      label: t('qualityTags'),
+      passed: tagCount >= 8,
+      hint: t('qualityTagsHint', { count: tagCount })
+    },
+    {
+      label: t('qualityAdvice'),
+      passed: Boolean(advice.bestTime && advice.coverText && advice.interactionGuide && advice.platformAdvice),
+      hint: t('qualityAdviceHint')
+    }
+  ];
+
+  const score = Math.round((items.filter((item) => item.passed).length / items.length) * 100);
+  const level = score >= 90 ? t('qualityExcellent') : score >= 70 ? t('qualityGood') : t('qualityNeedsWork');
+
+  return { score, level, items };
+});
+
+const qualityColor = computed(() => {
+  if (qualityReport.value.score >= 90) return '#22a06b';
+  if (qualityReport.value.score >= 70) return '#2f7cff';
+  return '#e6a23c';
 });
 
 function fillDemoForm() {

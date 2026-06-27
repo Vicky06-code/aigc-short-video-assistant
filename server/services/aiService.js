@@ -77,10 +77,10 @@ function validateAiResult(result, input) {
 
 function getMinSpeechLength(duration) {
   const value = Number(duration);
-  if (value === 15) return 120;
-  if (value === 30) return 260;
-  if (value === 60) return 520;
-  return 180;
+  if (value === 15) return 70;
+  if (value === 30) return 180;
+  if (value === 60) return 360;
+  return 140;
 }
 
 function buildMessages(prompt, retryReason = '') {
