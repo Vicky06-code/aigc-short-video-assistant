@@ -72,11 +72,11 @@
             <el-tag :type="item.tagType">{{ getPlatformLabel(item.platform) }}</el-tag>
             <span>{{ t('trendHeat') }} {{ item.heat }}</span>
           </div>
-          <h3>{{ item.topic }}</h3>
-          <p>{{ item.reason }}</p>
+          <h3>{{ getHotTopicTitle(item) }}</h3>
+          <p>{{ getHotTopicReason(item) }}</p>
           <div class="trend-meta">
-            <span>{{ t('trendStyle') }}：{{ getStyleLabel(item.style) }}</span>
-            <span>{{ t('trendAudience') }}：{{ item.audience }}</span>
+            <span>{{ t('trendStyle') }}{{ labelSeparator }}{{ getStyleLabel(item.style) }}</span>
+            <span>{{ t('trendAudience') }}{{ labelSeparator }}{{ getAudienceLabel(item.audience) }}</span>
           </div>
           <el-button type="primary" plain @click="useTopic(item)">{{ t('trendUse') }}</el-button>
         </article>
@@ -169,6 +169,64 @@ const styleLabelMap = {
   }
 };
 
+const audienceLabelMap = {
+  'zh-CN': {
+    内容创作者: '内容创作者',
+    大学生: '大学生',
+    职场新人: '职场新人',
+    品牌运营人员: '品牌运营人员',
+    普通用户: '普通用户',
+    新手博主: '新手博主'
+  },
+  'zh-TW': {
+    内容创作者: '內容創作者',
+    大学生: '大學生',
+    职场新人: '職場新人',
+    品牌运营人员: '品牌營運人員',
+    普通用户: '一般使用者',
+    新手博主: '新手創作者'
+  },
+  en: {
+    内容创作者: 'Content creators',
+    大学生: 'College students',
+    职场新人: 'New professionals',
+    品牌运营人员: 'Brand operators',
+    普通用户: 'General users',
+    新手博主: 'Beginner creators'
+  },
+  de: {
+    内容创作者: 'Content Creator',
+    大学生: 'Studierende',
+    职场新人: 'Berufseinsteiger',
+    品牌运营人员: 'Brand Operators',
+    普通用户: 'Allgemeine Nutzer',
+    新手博主: 'Neue Creator'
+  }
+};
+
+const hotTopicDisplayCopy = {
+  'zh-CN': {
+    title: (item) => item.topic,
+    liveReason: '来自今日热榜的高关注话题，适合快速拆解事件背景、用户关注点和可拍摄角度。',
+    fallbackReason: '根据日期轮换的备用热点选题，适合在热榜接口不可用时保持每日内容灵感更新。'
+  },
+  'zh-TW': {
+    title: (item) => item.topic,
+    liveReason: '來自今日熱榜的高關注話題，適合快速拆解事件背景、使用者關注點和可拍攝角度。',
+    fallbackReason: '根據日期輪換的備用熱門選題，適合在熱榜接口不可用時保持每日內容靈感更新。'
+  },
+  en: {
+    title: () => 'Trending short-video idea',
+    liveReason: 'A high-attention topic from today’s hot list, ready to turn into a clear short-video angle with background, audience interest, and filming direction.',
+    fallbackReason: 'A rotating fallback topic for daily content inspiration when the live hot list is unavailable.'
+  },
+  de: {
+    title: () => 'Trendidee für Kurzvideo',
+    liveReason: 'Ein stark beachtetes Thema aus den heutigen Trends, geeignet für Hintergrund, Publikumsinteresse und konkrete Videoansätze.',
+    fallbackReason: 'Ein rotierendes Ersatzthema für tägliche Content-Ideen, wenn die Live-Trendliste nicht verfügbar ist.'
+  }
+};
+
 const stats = reactive({
   total: 0,
   ai: 0,
@@ -184,6 +242,7 @@ const features = [
 ];
 
 const todayText = computed(() => new Date().toLocaleDateString(locale.value));
+const labelSeparator = computed(() => (locale.value === 'zh-CN' || locale.value === 'zh-TW' ? '：' : ': '));
 
 const platformFilters = computed(() => {
   const items = [
@@ -217,6 +276,20 @@ function getPlatformLabel(platform) {
 
 function getStyleLabel(style) {
   return styleLabelMap[locale.value]?.[style] || style;
+}
+
+function getAudienceLabel(audience) {
+  return audienceLabelMap[locale.value]?.[audience] || audience;
+}
+
+function getHotTopicTitle(item) {
+  const copy = hotTopicDisplayCopy[locale.value] || hotTopicDisplayCopy['zh-CN'];
+  return copy.title(item);
+}
+
+function getHotTopicReason(item) {
+  const copy = hotTopicDisplayCopy[locale.value] || hotTopicDisplayCopy['zh-CN'];
+  return hotTopicSource.value === 'baidu' ? copy.liveReason : copy.fallbackReason;
 }
 
 function formatTime(value) {
