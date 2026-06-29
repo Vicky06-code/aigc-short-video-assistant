@@ -29,6 +29,7 @@ function getExpectedStoryboardCount(duration) {
   if (value === 15) return 3;
   if (value === 30) return 5;
   if (value === 60) return 7;
+  if (value === 90) return 9;
   return 5;
 }
 
@@ -80,6 +81,7 @@ function getMinSpeechLength(duration) {
   if (value === 15) return 70;
   if (value === 30) return 180;
   if (value === 60) return 360;
+  if (value === 90) return 520;
   return 140;
 }
 

@@ -31,21 +31,6 @@
           <span>{{ t('latestTime') }}</span>
         </div>
       </div>
-
-      <el-divider />
-
-      <div class="section-title">
-        <h2>{{ t('systemIntro') }}</h2>
-        <p>{{ t('profileSystemDesc') }}</p>
-      </div>
-
-      <el-descriptions :column="1" border>
-        <el-descriptions-item :label="t('frontendTech')">Vue3 + Vite + Element Plus + Axios</el-descriptions-item>
-        <el-descriptions-item :label="t('backendTech')">Node.js + Express + JWT</el-descriptions-item>
-        <el-descriptions-item :label="t('database')">MySQL</el-descriptions-item>
-        <el-descriptions-item :label="t('systemVersion')">v1.0.0 Production Ready</el-descriptions-item>
-        <el-descriptions-item :label="t('developerInfo')">AIGC Short Video Assistant</el-descriptions-item>
-      </el-descriptions>
     </section>
 
     <el-dialog v-model="usernameDialogVisible" :title="t('updateUsername')" width="420px">

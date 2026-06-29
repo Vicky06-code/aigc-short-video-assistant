@@ -11,8 +11,6 @@
       <el-radio-button label="template">{{ t('templateMode') }}</el-radio-button>
       <el-radio-button label="ai">{{ t('aiMode') }}</el-radio-button>
     </el-radio-group>
-
-    <p>{{ modelValue === 'ai' ? t('aiModeTip') : t('templateModeTip') }}</p>
   </div>
 </template>
 

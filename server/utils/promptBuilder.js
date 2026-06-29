@@ -2,6 +2,8 @@ function getStoryboardCount(duration) {
   const value = Number.parseInt(duration, 10);
   if (value === 15) return 3;
   if (value === 30) return 5;
+  if (value === 60) return 7;
+  if (value === 90) return 9;
   return 7;
 }
 
@@ -9,6 +11,8 @@ function getScriptLengthRule(duration) {
   const value = Number.parseInt(duration, 10);
   if (value === 15) return '口播文案控制在 120 到 180 个中文字符，节奏紧凑但信息完整。';
   if (value === 30) return '口播文案控制在 260 到 380 个中文字符，必须像一段完整可录制的视频口播，而不是摘要。';
+  if (value === 60) return '口播文案控制在 480 到 680 个中文字符，必须包含更充分的解释、例子、步骤和结尾引导，但不要为了凑字数重复空话。';
+  if (value === 90) return '口播文案控制在 720 到 980 个中文字符，必须包含完整开场、背景解释、核心观点、至少 2 个具体例子或可执行建议、平台化表达和结尾互动引导，适合录制一条信息密度更高的短视频。';
   return '口播文案控制在 480 到 680 个中文字符，必须包含更充分的解释、例子、步骤和结尾引导，但不要为了凑字数重复空话。';
 }
 

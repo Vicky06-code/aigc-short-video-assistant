@@ -92,12 +92,6 @@
       </article>
     </section>
 
-    <section class="panel-card">
-      <div class="section-title">
-        <h2>{{ t('systemIntro') }}</h2>
-        <p>{{ t('systemIntroText') }}</p>
-      </div>
-    </section>
   </div>
 </template>
 

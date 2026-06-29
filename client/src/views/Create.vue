@@ -30,6 +30,7 @@
             <el-radio-button :label="15">15s</el-radio-button>
             <el-radio-button :label="30">30s</el-radio-button>
             <el-radio-button :label="60">60s</el-radio-button>
+            <el-radio-button :label="90">90s</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
@@ -242,8 +243,8 @@ const qualityReport = computed(() => {
     return { score: 0, level: '-', items: [] };
   }
 
-  const expectedScenes = { 15: 3, 30: 5, 60: 7 }[Number(form.duration)] || 5;
-  const minScriptLength = { 15: 45, 30: 90, 60: 160 }[Number(form.duration)] || 90;
+  const expectedScenes = { 15: 3, 30: 5, 60: 7, 90: 9 }[Number(form.duration)] || 5;
+  const minScriptLength = { 15: 45, 30: 90, 60: 160, 90: 240 }[Number(form.duration)] || 90;
   const titleCount = result.value.titles?.length || 0;
   const scriptLength = (result.value.speechScript || '').replace(/\s/g, '').length;
   const storyboardCount = result.value.storyboard?.length || 0;

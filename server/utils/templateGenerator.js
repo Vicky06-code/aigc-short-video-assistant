@@ -11,7 +11,7 @@ const STYLES = [
   '情感共鸣',
   '搞笑娱乐'
 ];
-const DURATIONS = [15, 30, 60];
+const DURATIONS = [15, 30, 60, 90];
 
 const platformAdviceMap = {
   抖音: {
@@ -403,6 +403,13 @@ export function generateSpeechScript({ topic, platform, style, duration, audienc
 
     if (duration === 15) return shortScript;
     if (duration === 30) return mediumScript;
+    if (duration === 90) {
+      return paragraphJoin([
+        longScript,
+        `如果要做成 90 秒内容，可以再补一个“错误用法”和“正确用法”的对比。比如先演一段把梗用得很生硬的场景，再切到更自然的聊天语境，让观众一眼看懂差别。`,
+        `最后再提醒一句：热梗能增加表达的轻松感，但不要为了跟风硬塞进所有内容。真正有传播力的短视频，是让观众既看懂梗，也知道自己什么时候能用、什么时候最好别用。`
+      ]);
+    }
     return longScript;
   }
 
@@ -448,6 +455,14 @@ export function generateSpeechScript({ topic, platform, style, duration, audienc
 
   if (duration === 15) return shortScript;
   if (duration === 30) return mediumScript;
+  if (duration === 90) {
+    return paragraphJoin([
+      longScript,
+      `如果把这条内容扩展到 90 秒，还可以再加一个更具体的落地示例。先假设观众现在正遇到“${topic}”相关选择，然后按照“先看原因、再看影响、最后看行动”的顺序拆开讲。`,
+      `比如第一步，把信息来源分成官方信息、真实体验和情绪化讨论；第二步，只保留和自己有关的部分；第三步，给自己设一个观察期限，而不是被热点推着马上做决定。这样观众听完之后，不只是知道一个结论，还能带走一套可复用的判断方法。`,
+      `结尾可以再次收束到${audience}的真实处境：遇到类似话题时，不需要盲目焦虑，也不要完全忽略，先把问题拆小，再决定下一步怎么做。`
+    ]);
+  }
   return longScript;
 }
 
@@ -470,6 +485,8 @@ function splitScript(script, count) {
 function sceneCountByDuration(duration) {
   if (duration === 15) return 3;
   if (duration === 30) return 5;
+  if (duration === 60) return 7;
+  if (duration === 90) return 9;
   return 7;
 }
 
