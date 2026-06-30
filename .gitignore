@@ -1,5 +1,9 @@
 node_modules/
 dist/
+playwright-report/
+test-results/
+client/playwright-report/
+client/test-results/
 .env
 .DS_Store
 npm-debug.log*

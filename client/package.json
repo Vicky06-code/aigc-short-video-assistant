@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:demo": "set E2E_SLOWMO=900&& playwright test auth.spec.js -g \"用户可以登录并进入工作台\" --headed --workers=1 --project=chromium",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^5.2.4",
@@ -16,6 +20,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.53.1",
     "vite": "^6.0.7"
   }
 }

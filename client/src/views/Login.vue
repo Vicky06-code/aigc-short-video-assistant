@@ -9,51 +9,51 @@
 
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent>
         <el-form-item :label="t('email')" prop="email">
-          <el-input v-model="form.email" :placeholder="t('inputEmail')" clearable />
+          <el-input data-testid="login-email" v-model="form.email" :placeholder="t('inputEmail')" clearable />
         </el-form-item>
 
         <el-form-item :label="t('password')" prop="password">
-          <el-input v-model="form.password" type="password" :placeholder="t('inputPassword')" show-password />
+          <el-input data-testid="login-password" v-model="form.password" type="password" :placeholder="t('inputPassword')" show-password />
         </el-form-item>
 
         <div class="auth-actions">
-          <el-button class="auth-submit" type="primary" size="large" :loading="loading" @click="submit">{{ t('login') }}</el-button>
+          <el-button data-testid="login-submit" class="auth-submit" type="primary" size="large" :loading="loading" @click="submit">{{ t('login') }}</el-button>
           <div class="auth-links">
-            <el-button link @click="resetDialogVisible = true">{{ t('forgotPassword') }}</el-button>
+            <el-button data-testid="forgot-password" link @click="resetDialogVisible = true">{{ t('forgotPassword') }}</el-button>
             <span class="auth-link-divider"></span>
-            <el-button link @click="$router.push('/register')">{{ t('goRegister') }}</el-button>
+            <el-button data-testid="go-register" link @click="$router.push('/register')">{{ t('goRegister') }}</el-button>
           </div>
         </div>
       </el-form>
     </div>
 
-    <el-dialog v-model="resetDialogVisible" :title="t('resetPassword')" width="440px" align-center>
+    <el-dialog data-testid="reset-dialog" v-model="resetDialogVisible" :title="t('resetPassword')" width="440px" align-center>
       <el-form ref="resetFormRef" :model="resetForm" :rules="resetRules" label-position="top" @submit.prevent>
         <el-form-item :label="t('email')" prop="email">
           <div class="verification-row">
-            <el-input v-model="resetForm.email" :placeholder="t('inputEmail')" clearable />
-            <el-button :loading="sendingCode" :disabled="countdown > 0" @click="sendCode">
+            <el-input data-testid="reset-email" v-model="resetForm.email" :placeholder="t('inputEmail')" clearable />
+            <el-button data-testid="send-reset-code" :loading="sendingCode" :disabled="countdown > 0" @click="sendCode">
               {{ countdown > 0 ? `${countdown}s` : t('sendCode') }}
             </el-button>
           </div>
         </el-form-item>
 
         <el-form-item :label="t('verificationCode')" prop="code">
-          <el-input v-model="resetForm.code" :placeholder="t('inputVerificationCode')" maxlength="6" clearable />
+          <el-input data-testid="reset-code" v-model="resetForm.code" :placeholder="t('inputVerificationCode')" maxlength="6" clearable />
         </el-form-item>
 
         <el-form-item :label="t('newPassword')" prop="newPassword">
-          <el-input v-model="resetForm.newPassword" type="password" :placeholder="t('passwordRule')" show-password />
+          <el-input data-testid="reset-new-password" v-model="resetForm.newPassword" type="password" :placeholder="t('passwordRule')" show-password />
         </el-form-item>
 
         <el-form-item :label="t('confirmPassword')" prop="confirmPassword">
-          <el-input v-model="resetForm.confirmPassword" type="password" :placeholder="t('inputConfirmPassword')" show-password />
+          <el-input data-testid="reset-confirm-password" v-model="resetForm.confirmPassword" type="password" :placeholder="t('inputConfirmPassword')" show-password />
         </el-form-item>
       </el-form>
 
       <template #footer>
         <el-button @click="resetDialogVisible = false">{{ t('cancel') }}</el-button>
-        <el-button type="primary" :loading="resetting" @click="confirmReset">{{ t('confirmReset') }}</el-button>
+        <el-button data-testid="confirm-reset" type="primary" :loading="resetting" @click="confirmReset">{{ t('confirmReset') }}</el-button>
       </template>
     </el-dialog>
   </div>

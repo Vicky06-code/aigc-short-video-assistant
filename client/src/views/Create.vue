@@ -10,23 +10,23 @@
 
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
         <el-form-item :label="t('topic')" prop="topic">
-          <el-input v-model="form.topic" :placeholder="t('topicPlaceholder')" clearable />
+          <el-input data-testid="create-topic" v-model="form.topic" :placeholder="t('topicPlaceholder')" clearable />
         </el-form-item>
 
         <el-form-item :label="t('platform')" prop="platform">
-          <el-select v-model="form.platform" class="full-width">
+          <el-select data-testid="create-platform" v-model="form.platform" class="full-width">
             <el-option v-for="item in platforms" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
         <el-form-item :label="t('style')" prop="style">
-          <el-select v-model="form.style" class="full-width">
+          <el-select data-testid="create-style" v-model="form.style" class="full-width">
             <el-option v-for="item in styles" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
         <el-form-item :label="t('duration')" prop="duration">
-          <el-radio-group v-model="form.duration">
+          <el-radio-group data-testid="create-duration" v-model="form.duration">
             <el-radio-button :label="15">15s</el-radio-button>
             <el-radio-button :label="30">30s</el-radio-button>
             <el-radio-button :label="60">60s</el-radio-button>
@@ -35,11 +35,12 @@
         </el-form-item>
 
         <el-form-item :label="t('audience')" prop="audience">
-          <el-input v-model="form.audience" :placeholder="t('audiencePlaceholder')" clearable />
+          <el-input data-testid="create-audience" v-model="form.audience" :placeholder="t('audiencePlaceholder')" clearable />
         </el-form-item>
 
         <el-form-item :label="t('creativeRequirement')" prop="creativeRequirement">
           <el-input
+            data-testid="create-requirement"
             v-model="form.creativeRequirement"
             type="textarea"
             :rows="4"
@@ -52,17 +53,17 @@
         <GenerationModeSwitch v-model="generationModePreference" />
 
         <div class="form-actions">
-          <el-button class="full-width" type="primary" size="large" :loading="loading" :disabled="loading" @click="generate">
+          <el-button data-testid="create-generate" class="full-width" type="primary" size="large" :loading="loading" :disabled="loading" @click="generate">
             {{ loading ? t('generating') : t('generate') }}
           </el-button>
-          <el-button v-if="result" size="large" :disabled="loading" @click="generate">
+          <el-button v-if="result" data-testid="create-regenerate" size="large" :disabled="loading" @click="generate">
             {{ t('regenerate') }}
           </el-button>
         </div>
       </el-form>
     </section>
 
-    <section ref="resultSection" class="create-results">
+    <section ref="resultSection" class="create-results" data-testid="create-result">
       <div v-if="loading" class="empty-state">
         <el-icon class="loading-icon"><Loading /></el-icon>
         <h2>{{ t('generating') }}</h2>
@@ -82,8 +83,8 @@
           </div>
           <div class="save-actions">
             <el-tag :type="modeTagType">{{ modeLabel }}</el-tag>
-            <el-button @click="copyAll">{{ t('copyAll') }}</el-button>
-            <el-button type="success" :loading="saving" :disabled="saved" @click="saveResult">
+            <el-button data-testid="create-copy" @click="copyAll">{{ t('copyAll') }}</el-button>
+            <el-button data-testid="create-save" type="success" :loading="saving" :disabled="saved" @click="saveResult">
               {{ saved ? t('saved') : t('savePlan') }}
             </el-button>
           </div>

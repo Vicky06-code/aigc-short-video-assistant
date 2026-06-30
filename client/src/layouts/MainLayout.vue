@@ -10,16 +10,16 @@
       </div>
 
       <el-menu :default-active="$route.path" router class="side-menu">
-        <el-menu-item index="/dashboard">
+        <el-menu-item index="/dashboard" data-testid="nav-dashboard">
           <span>{{ t('navDashboard') }}</span>
         </el-menu-item>
-        <el-menu-item index="/create">
+        <el-menu-item index="/create" data-testid="nav-create">
           <span>{{ t('navCreate') }}</span>
         </el-menu-item>
-        <el-menu-item index="/history">
+        <el-menu-item index="/history" data-testid="nav-history">
           <span>{{ t('navHistory') }}</span>
         </el-menu-item>
-        <el-menu-item index="/profile">
+        <el-menu-item index="/profile" data-testid="nav-profile">
           <span>{{ t('navProfile') }}</span>
         </el-menu-item>
       </el-menu>
@@ -34,7 +34,7 @@
         <div class="topbar-user">
           <LanguageSwitcher />
           <span>{{ user?.username || t('creator') }}</span>
-          <el-button type="primary" plain @click="$router.push('/create')">{{ t('startCreate') }}</el-button>
+          <el-button data-testid="topbar-create" type="primary" plain @click="$router.push('/create')">{{ t('startCreate') }}</el-button>
         </div>
       </header>
 

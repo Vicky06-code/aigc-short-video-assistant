@@ -7,7 +7,7 @@
       </el-tag>
     </div>
 
-    <el-radio-group :model-value="modelValue" class="mode-radio-group" @change="emit('update:modelValue', $event)">
+    <el-radio-group data-testid="generation-mode-switch" :model-value="modelValue" class="mode-radio-group" @change="emit('update:modelValue', $event)">
       <el-radio-button label="template">{{ t('templateMode') }}</el-radio-button>
       <el-radio-button label="ai">{{ t('aiMode') }}</el-radio-button>
     </el-radio-group>

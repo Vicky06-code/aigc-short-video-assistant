@@ -5,9 +5,9 @@
       <h2>{{ currentUser?.username || t('creator') }}</h2>
       <span class="muted">{{ currentUser?.email || '-' }}</span>
       <div class="profile-actions">
-        <el-button type="primary" @click="openUsernameDialog">{{ t('updateUsername') }}</el-button>
-        <el-button @click="passwordDialogVisible = true">{{ t('updatePassword') }}</el-button>
-        <el-button type="danger" plain @click="logout">{{ t('logout') }}</el-button>
+        <el-button data-testid="profile-update-username" type="primary" @click="openUsernameDialog">{{ t('updateUsername') }}</el-button>
+        <el-button data-testid="profile-update-password" @click="passwordDialogVisible = true">{{ t('updatePassword') }}</el-button>
+        <el-button data-testid="profile-logout" type="danger" plain @click="logout">{{ t('logout') }}</el-button>
       </div>
     </section>
 
@@ -36,27 +36,27 @@
     <el-dialog v-model="usernameDialogVisible" :title="t('updateUsername')" width="420px">
       <el-form ref="usernameFormRef" :model="usernameForm" :rules="usernameRules" label-position="top">
         <el-form-item :label="t('newUsername')" prop="username">
-          <el-input v-model="usernameForm.username" maxlength="30" show-word-limit />
+          <el-input data-testid="profile-username-input" v-model="usernameForm.username" maxlength="30" show-word-limit />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="usernameDialogVisible = false">{{ t('cancel') }}</el-button>
-        <el-button type="primary" :loading="updatingUsername" @click="updateUsername">{{ t('save') }}</el-button>
+        <el-button data-testid="profile-save-username" type="primary" :loading="updatingUsername" @click="updateUsername">{{ t('save') }}</el-button>
       </template>
     </el-dialog>
 
     <el-dialog v-model="passwordDialogVisible" :title="t('updatePassword')" width="420px">
       <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-position="top">
         <el-form-item :label="t('oldPassword')" prop="oldPassword">
-          <el-input v-model="passwordForm.oldPassword" type="password" show-password />
+          <el-input data-testid="profile-old-password" v-model="passwordForm.oldPassword" type="password" show-password />
         </el-form-item>
         <el-form-item :label="t('newPassword')" prop="newPassword">
-          <el-input v-model="passwordForm.newPassword" type="password" :placeholder="t('passwordRule')" show-password />
+          <el-input data-testid="profile-new-password" v-model="passwordForm.newPassword" type="password" :placeholder="t('passwordRule')" show-password />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="passwordDialogVisible = false">{{ t('cancel') }}</el-button>
-        <el-button type="primary" :loading="updatingPassword" @click="changePassword">{{ t('save') }}</el-button>
+        <el-button data-testid="profile-save-password" type="primary" :loading="updatingPassword" @click="changePassword">{{ t('save') }}</el-button>
       </template>
     </el-dialog>
   </div>

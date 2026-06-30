@@ -9,24 +9,24 @@
 
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent>
         <el-form-item :label="t('username')" prop="username">
-          <el-input v-model="form.username" :placeholder="t('inputUsername')" clearable />
+          <el-input data-testid="register-username" v-model="form.username" :placeholder="t('inputUsername')" clearable />
         </el-form-item>
 
         <el-form-item :label="t('email')" prop="email">
-          <el-input v-model="form.email" :placeholder="t('inputEmail')" clearable />
+          <el-input data-testid="register-email" v-model="form.email" :placeholder="t('inputEmail')" clearable />
         </el-form-item>
 
         <el-form-item :label="t('password')" prop="password">
-          <el-input v-model="form.password" type="password" :placeholder="t('passwordRule')" show-password />
+          <el-input data-testid="register-password" v-model="form.password" type="password" :placeholder="t('passwordRule')" show-password />
         </el-form-item>
 
         <el-form-item :label="t('confirmPassword')" prop="confirmPassword">
-          <el-input v-model="form.confirmPassword" type="password" :placeholder="t('inputConfirmPassword')" show-password />
+          <el-input data-testid="register-confirm-password" v-model="form.confirmPassword" type="password" :placeholder="t('inputConfirmPassword')" show-password />
         </el-form-item>
 
         <div class="auth-actions">
-          <el-button type="primary" size="large" :loading="loading" @click="submit">{{ t('register') }}</el-button>
-          <el-button link @click="$router.push('/login')">{{ t('goLogin') }}</el-button>
+          <el-button data-testid="register-submit" type="primary" size="large" :loading="loading" @click="submit">{{ t('register') }}</el-button>
+          <el-button data-testid="go-login" link @click="$router.push('/login')">{{ t('goLogin') }}</el-button>
         </div>
       </el-form>
     </div>

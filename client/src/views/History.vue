@@ -6,20 +6,20 @@
         <p>{{ t('historyIntro') }}</p>
       </div>
       <div class="history-actions">
-        <el-button type="primary" @click="$router.push('/create')">{{ t('newCreate') }}</el-button>
-        <el-button type="danger" plain :disabled="records.length === 0" @click="clearAll">{{ t('clearAll') }}</el-button>
+        <el-button data-testid="history-new-create" type="primary" @click="$router.push('/create')">{{ t('newCreate') }}</el-button>
+        <el-button data-testid="history-clear-all" type="danger" plain :disabled="records.length === 0" @click="clearAll">{{ t('clearAll') }}</el-button>
       </div>
     </div>
 
     <div class="history-filters">
-      <el-input v-model="filters.keyword" :placeholder="t('searchTopic')" clearable />
-      <el-select v-model="filters.platform" :placeholder="t('filterPlatform')" clearable>
+      <el-input data-testid="history-search" v-model="filters.keyword" :placeholder="t('searchTopic')" clearable />
+      <el-select data-testid="history-platform-filter" v-model="filters.platform" :placeholder="t('filterPlatform')" clearable>
         <el-option v-for="item in platforms" :key="item" :label="item" :value="item" />
       </el-select>
-      <el-select v-model="filters.style" :placeholder="t('filterStyle')" clearable>
+      <el-select data-testid="history-style-filter" v-model="filters.style" :placeholder="t('filterStyle')" clearable>
         <el-option v-for="item in styles" :key="item" :label="item" :value="item" />
       </el-select>
-      <el-select v-model="filters.order" :placeholder="t('sortTime')">
+      <el-select data-testid="history-order" v-model="filters.order" :placeholder="t('sortTime')">
         <el-option :label="t('newest')" value="desc" />
         <el-option :label="t('oldest')" value="asc" />
       </el-select>
@@ -27,10 +27,10 @@
 
     <div class="batch-bar">
       <span class="muted">{{ t('selectedRows', { count: selectedRows.length, total: filteredRecords.length }) }}</span>
-      <el-button type="danger" plain :disabled="selectedRows.length === 0" @click="removeBatch">{{ t('batchDelete') }}</el-button>
+      <el-button data-testid="history-batch-delete" type="danger" plain :disabled="selectedRows.length === 0" @click="removeBatch">{{ t('batchDelete') }}</el-button>
     </div>
 
-    <el-table :data="pagedRecords" v-loading="loading" border @selection-change="selectedRows = $event">
+    <el-table data-testid="history-table" :data="pagedRecords" v-loading="loading" border @selection-change="selectedRows = $event">
       <el-table-column type="selection" width="48" />
       <el-table-column prop="topic" :label="t('tableTopic')" min-width="220" show-overflow-tooltip />
       <el-table-column prop="platform" :label="t('platform')" width="110" />
@@ -48,9 +48,9 @@
       </el-table-column>
       <el-table-column :label="t('actions')" width="220" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" @click="viewDetail(row)">{{ t('view') }}</el-button>
-          <el-button link type="primary" @click="reuseRecord(row)">{{ t('reuseCreation') }}</el-button>
-          <el-button link type="danger" @click="remove(row)">{{ t('delete') }}</el-button>
+          <el-button data-testid="history-view" link type="primary" @click="viewDetail(row)">{{ t('view') }}</el-button>
+          <el-button data-testid="history-reuse" link type="primary" @click="reuseRecord(row)">{{ t('reuseCreation') }}</el-button>
+          <el-button data-testid="history-delete" link type="danger" @click="remove(row)">{{ t('delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
