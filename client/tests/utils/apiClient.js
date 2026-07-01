@@ -76,3 +76,19 @@ export async function saveCreationByApi(request, token, generated) {
   expect(body.success).toBeTruthy();
   return body.data;
 }
+
+export async function getHistoryByApi(request, token) {
+  const response = await request.get('/api/creation/history', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  expect(response.ok()).toBeTruthy();
+  const body = await response.json();
+  expect(body.success).toBeTruthy();
+  return body.data || [];
+}
+
+export async function seedCreation(request, token, input = creationPayload()) {
+  const generated = await generateByApi(request, token, input);
+  await saveCreationByApi(request, token, generated);
+  return generated;
+}

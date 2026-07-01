@@ -18,6 +18,16 @@ export class HistoryPage extends BasePage {
 
   async deleteFirstRecord() {
     await this.byTestId('history-delete').first().click();
-    await this.page.locator('.el-message-box').getByRole('button').filter({ hasText: /确定|OK|Confirm|Bestätigen/i }).click();
+    await this.confirmDialog();
+  }
+
+  async confirmDialog() {
+    await this.page.locator('.el-message-box .el-button--primary').click();
+  }
+
+  async selectFirstRows(count = 1) {
+    for (let index = 0; index < count; index += 1) {
+      await this.page.locator('.el-table__body-wrapper .el-checkbox__input').nth(index).click();
+    }
   }
 }

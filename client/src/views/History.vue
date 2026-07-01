@@ -71,8 +71,8 @@
       <div v-loading="detailLoading">
         <template v-if="detail">
           <div class="detail-actions">
-            <el-button @click="exportWord(detail)">{{ t('exportWord') }}</el-button>
-            <el-button @click="exportPdf(detail)">{{ t('exportPdf') }}</el-button>
+            <el-button data-testid="history-export-word" @click="exportWord(detail)">{{ t('exportWord') }}</el-button>
+            <el-button data-testid="history-export-pdf" @click="exportPdf(detail)">{{ t('exportPdf') }}</el-button>
             <el-button type="primary" @click="reuseDetail(detail)">{{ t('reuseCreation') }}</el-button>
           </div>
 

@@ -3,6 +3,9 @@ import { BasePage } from './BasePage.js';
 
 export class CreatePage extends BasePage {
   async goto() {
+    await this.page.addInitScript(() => {
+      window.localStorage.setItem('generationModePreference', 'template');
+    });
     await this.page.goto('/create');
     await expect(this.byTestId('create-generate')).toBeVisible();
   }
@@ -19,7 +22,11 @@ export class CreatePage extends BasePage {
   }
 
   async chooseTemplateMode() {
-    await this.byTestId('generation-mode-switch').getByText(/模板|Template/i).first().click();
+    await this.byTestId('generation-mode-switch').locator('.el-radio-button').first().click();
+  }
+
+  async chooseAiMode() {
+    await this.byTestId('generation-mode-switch').locator('.el-radio-button').nth(1).click();
   }
 
   async generate() {

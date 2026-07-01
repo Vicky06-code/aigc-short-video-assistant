@@ -78,7 +78,7 @@
             <span>{{ t('trendStyle') }}{{ labelSeparator }}{{ getStyleLabel(item.style) }}</span>
             <span>{{ t('trendAudience') }}{{ labelSeparator }}{{ getAudienceLabel(item.audience) }}</span>
           </div>
-          <el-button type="primary" plain @click="useTopic(item)">{{ t('trendUse') }}</el-button>
+          <el-button data-testid="hot-topic-use" type="primary" plain @click="useTopic(item)">{{ t('trendUse') }}</el-button>
         </article>
       </div>
 

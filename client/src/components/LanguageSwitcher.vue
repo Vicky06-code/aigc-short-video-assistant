@@ -1,5 +1,5 @@
 <template>
-  <el-select v-model="selectedLocale" class="language-switcher" size="small" @change="setLocale">
+  <el-select data-testid="language-switcher" v-model="selectedLocale" class="language-switcher" size="small" @change="setLocale">
     <el-option v-for="item in localeOptions" :key="item.value" :label="item.label" :value="item.value" />
   </el-select>
 </template>

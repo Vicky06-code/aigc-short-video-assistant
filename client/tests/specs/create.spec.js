@@ -17,9 +17,9 @@ test.describe('智能创作流程', () => {
     await createPage.fillForm(creationPayload());
     await createPage.generate();
 
-    await expect(page.getByText(/口播文案|Speech/i)).toBeVisible();
-    await expect(page.getByText(/分镜脚本|Storyboard/i)).toBeVisible();
-    await expect(page.getByText(/发布建议|Publish/i)).toBeVisible();
+    await expect(page.getByTestId('create-result')).toContainText('口播文案');
+    await expect(page.getByTestId('create-result')).toContainText('分镜脚本');
+    await expect(page.getByTestId('create-result')).toContainText('发布建议');
 
     await createPage.save();
   });
